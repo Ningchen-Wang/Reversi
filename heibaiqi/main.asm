@@ -17,7 +17,7 @@
 
 main proc
 		local turn:DWORD 
-		local map:DWORD 64 DUP(?)
+		local map[64]:DWORD
 		local black_count:DWORD
 		local white_count:DWORD
 init:
