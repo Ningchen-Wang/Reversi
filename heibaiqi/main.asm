@@ -16,10 +16,10 @@
         .code
 
 main proc
-		local DWORD turn
-		local DWORD map 64,dup(?)
-		local DWORD black_count
-		local DWORD white_count
+		local turn:DWORD 
+		local map:DWORD 64 DUP(?)
+		local black_count:DWORD
+		local white_count:DWORD
 init:
 		invoke init, addr turn, addr map, addr black_count, addr white_count
 		mov retval, eax
