@@ -292,6 +292,7 @@ UpdateMap PROC,
 	local delta_x:SDWORD
 	local delta_y:SDWORD
 
+	pushad
 	mov ebx, 3
 	sub ebx, turn
 	mov opposite, ebx
@@ -306,6 +307,7 @@ UpdateMap PROC,
 direction_loop_x:
 	add delta_x, 1	
 	.IF (delta_x == 2)
+		popad
 		ret
 	.ENDIF
 	mov delta_y, -2
