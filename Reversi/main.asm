@@ -36,8 +36,11 @@ InitMap PROC, pturn:PTR DWORD, pmap:PTR DWORD, pblack_count:PTR DWORD, pwhite_co
 
 	mov ecx, 64
 	mov esi, 0
+	mov ebx, 0
 	L1:
-		mov [pmap + esi], 0
+		mov eax, pmap
+		add eax, esi
+		mov [eax], ebx
 		add esi, 4
 		loop L1
 
