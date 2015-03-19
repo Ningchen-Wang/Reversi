@@ -1,4 +1,4 @@
-;heibaiqi_main
+;Reversi_main
 ;Author: wangningchen, wangchengpeng
 ;Create: 2015/3/18
 ;Last modify: 2015/3/18
