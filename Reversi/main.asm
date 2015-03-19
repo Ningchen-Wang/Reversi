@@ -84,7 +84,7 @@ GetXYAddress ENDP
 ;5-direction vector(1, 1)  6-direction vector(-1, 1)
 ;7-direction vector(1, -1)  8-direction vector(-1, -1)
 
-Test1 PROC USES esi edi edx,
+Test1 PROC USES esi edi edx ecx,
 	x:DWORD, y:DWORD, pmap:PTR DWORD, pturn:DWORD
 ;by the direction vector (1, 0)
 ;current turn is pturn
@@ -103,8 +103,7 @@ Test1 PROC USES esi edi edx,
 	.ENDIF
 	 
 	INVOKE GetMapAddress, x, y, pmap
-	mov esi, pmap
-	add esi, eax
+	mov esi, eax
 	push ebx
 	mov ebx, [esi]
 	mov xystate, ebx
@@ -121,8 +120,7 @@ Test1 PROC USES esi edi edx,
 	push esi
 	push edi
 	INVOKE GetMapAddress, esi, edi, pmap
-	mov esi, pmap
-	add esi, eax
+	mov esi, eax
 	push ebx
 	mov ebx, [esi]
 	mov xystate, ebx
@@ -130,7 +128,9 @@ Test1 PROC USES esi edi edx,
 	pop edi
 	pop esi
 
-	.IF (xystate == turn || xystate == 0)
+	
+	mov ecx, xystate
+	.IF (ecx == pturn || xystate == 0)
 		mov ebx, 0
 		ret
 	.ENDIF
@@ -144,8 +144,7 @@ Test1 PROC USES esi edi edx,
 		push esi
 		push edi
 		INVOKE GetMapAddress, esi, edi, pmap
-		mov esi, pmap
-		add esi, eax
+		mov esi, eax
 		push ebx
 		mov ebx, [esi]
 		mov xystate, ebx
@@ -153,7 +152,8 @@ Test1 PROC USES esi edi edx,
 		pop edi
 		pop esi
 		
-		.IF (xystate == opposite)
+		mov ecx, xystate
+		.IF (ecx == opposite)
 			mov edx, 1
 		.ELSEIF
 			mov edx, 0
@@ -163,19 +163,14 @@ Test1 PROC USES esi edi edx,
 		INVOKE JudgeInGrid, esi, edi
 	.ENDW
 
-	.IF (edx == 0 && xystate == pturn)
+	mov ecx, xystate
+	.IF (edx == 0 && ecx == pturn)
 		mov ebx, 1
 	.ELSE
 		mov ebx, 0
 	.ENDIF
 	ret
-TEST1 ENDP
-
-
-	
-	
-
-;--------------------------------------------------------------------------------------------
+Test1 ENDP
 
 ;----------------------------------------------------
 InitMap PROC, pturn:PTR DWORD, pmap:PTR DWORD, pblack_count:PTR DWORD, pwhite_count:PTR DWORD
