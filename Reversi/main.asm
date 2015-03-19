@@ -251,7 +251,8 @@ InitMap PROC, pturn:PTR DWORD, pmap:PTR DWORD, pblack_count:PTR DWORD, pwhite_co
 	ret
 InitMap ENDP
 
-CheckEnd PROC USES ebx ecx edx, pmap:PTR DWORD, black_count: DWORD, white_count: DWORD
+CheckEnd PROC USES ebx ecx edx, 
+	pmap:PTR DWORD, black_count: DWORD, white_count: DWORD
 ;check if the game is finished, retval in eax, 0 means not finished, 1 means finished
 	.IF (black_count + white_count == 64)
 		mov eax, 1
@@ -283,6 +284,124 @@ check_loop:
 	ret
 CheckEnd ENDP
 
+UpdateMap PROC,
+	x:DWORD, y:DWORD, pmap:PTR DWORD, turn:DWORD
+;Update map when a player decide to choice (x,y) in this turn
+;(x,y) must be a valid position
+	local opposite:DWORD
+	local delta_x:SDWORD
+	local delta_y:SDWORD
+
+	mov ebx, 3
+	sub ebx, turn
+	mov opposite, ebx
+
+	INVOKE GetMapAddress, x, y, pmap
+	mov esi, eax
+	mov eax, turn
+	mov [esi], eax	
+
+	
+	mov delta_x, -2
+direction_loop_x:
+	add delta_x, 1	
+	.IF (delta_x == 2)
+		ret
+	.ENDIF
+	mov delta_y, -2
+direction_loop_y:
+	add delta_y, 1	
+	.IF (delta_y == 2)
+		jmp direction_loop_x
+	.ENDIF
+	.IF (delta_x == 0 && delta_y == 0)
+		jmp direction_loop_y
+	.ENDIF
+	mov esi, x
+	add esi, delta_x
+	mov edi, y
+	add edi, delta_y
+	push esi
+	push edi
+	INVOKE GetMapAddress, esi, edi, pmap
+	mov esi, eax
+	push ebx
+	mov ebx, [esi]
+	mov ecx, ebx
+	pop ebx
+	pop edi
+	pop esi
+
+	.IF (ecx == turn || ecx == 0)
+		jmp direction_loop_y
+	.ENDIF
+
+	mov esi, x
+	mov edi, y
+	mov eax, 1
+	mov edx, 1
+	add esi, delta_x
+	add edi, delta_y
+	.WHILE (edx == 1)
+		INVOKE JudgeInGrid, esi, edi
+		.IF (eax == 0)
+			jmp direction_loop_y
+		.ENDIF
+		push esi
+		push edi
+		INVOKE GetMapAddress, esi, edi, pmap
+		mov esi, eax
+		push ebx
+		mov ebx, [esi]
+		mov ecx, ebx
+		pop ebx
+		pop edi
+		pop esi
+		
+		.IF (ecx == opposite)
+			mov edx, 1
+		.ELSEIF
+			mov edx, 0
+		.ENDIF
+
+		add esi, delta_x
+		add edi, delta_y
+	.ENDW
+
+	.IF (edx == 0 && ecx == turn)
+		mov esi, x
+		mov edi, y
+		add esi, delta_x
+		add edi, delta_y
+		mov edx, 1
+		.WHILE (edx == 1)
+			push esi
+			push edi
+			INVOKE GetMapAddress, esi, edi, pmap
+			mov esi, eax
+			push ebx
+			mov ebx, [esi]
+			.IF (ebx == opposite)
+				mov edx, 1
+				mov eax, turn
+				mov [esi], eax
+				;need update map here
+			.ELSEIF
+				mov edx, 0
+			.ENDIF
+
+			pop ebx
+			pop edi
+			pop esi
+
+			add esi, delta_x
+			add edi, delta_y
+		.ENDW
+		
+	.ENDIF
+	jmp direction_loop_y
+UpdateMap ENDP
+
 main PROC
 	local turn:DWORD 
 	local map[64]:DWORD
@@ -297,7 +416,7 @@ black_input:
 	.IF (eax == 0)
 		jmp black_input
 	.ENDIF 
-	;INVOKE scan_map
+	INVOKE UpdateMap, edx, ebx, addr map, turn
 	INVOKE CheckEnd, addr map, black_count, white_count 
 white_input:
 	
