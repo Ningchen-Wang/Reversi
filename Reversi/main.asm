@@ -84,16 +84,17 @@ GetXYAddress ENDP
 ;5-direction vector(1, 1)  6-direction vector(-1, 1)
 ;7-direction vector(1, -1)  8-direction vector(-1, -1)
 
-Test1 PROC USES esi edi edx ecx,
-	x:DWORD, y:DWORD, pmap:PTR DWORD, pturn:DWORD
-;by the direction vector (1, 0)
-;current turn is pturn
+TryStep PROC USES esi edi edx ecx,
+	x:DWORD, y:DWORD, pmap:PTR DWORD, turn:DWORD
+;whether (x,y) is a valid position in this turn
 ;if it is valid step, ebx = 1;else ebx = 0
 	local opposite:DWORD
 	local xystate:DWORD
+	local delta_x:SDWORD
+	local delta_y:SDWORD
 
 	mov ebx, 3
-	sub ebx, pturn
+	sub ebx, turn
 	mov opposite, ebx
 
 	INVOKE JudgeInGrid, x, y
@@ -109,14 +110,31 @@ Test1 PROC USES esi edi edx ecx,
 	mov xystate, ebx
 	pop ebx
 	
-	.IF (xystate != 0 || x == 7 || x == 6)
+	.IF (xystate != 0)
 		mov ebx, 0
 		ret
 	.ENDIF
-
+	
+	mov delta_x, -2
+direction_loop_x:
+	add delta_x, 1	
+	.IF (delta_x == 2)
+		mov ebx, 0
+		ret
+	.ENDIF
+	mov delta_y, -2
+direction_loop_y:
+	add delta_y, 1	
+	.IF (delta_y == 2)
+		jmp direction_loop_x
+	.ENDIF
+	.IF (delta_x == 0 && delta_y == 0)
+		jmp direction_loop_y
+	.ENDIF
 	mov esi, x
-	add esi, 1
+	add esi, delta_x
 	mov edi, y
+	add edi, delta_y
 	push esi
 	push edi
 	INVOKE GetMapAddress, esi, edi, pmap
@@ -130,17 +148,21 @@ Test1 PROC USES esi edi edx ecx,
 
 	
 	mov ecx, xystate
-	.IF (ecx == pturn || xystate == 0)
-		mov ebx, 0
-		ret
+	.IF (ecx == turn || xystate == 0)
+		jmp direction_loop_y
 	.ENDIF
 
 	mov esi, x
 	mov edi, y
 	mov eax, 1
 	mov edx, 1
-	add esi, 1
-	.WHILE (eax == 1 && edx == 1)
+	add esi, delta_x
+	add edi, delta_y
+	.WHILE (edx == 1)
+		INVOKE JudgeInGrid, esi, edi
+		.IF (eax == 0)
+			jmp direction_loop_y
+		.ENDIF
 		push esi
 		push edi
 		INVOKE GetMapAddress, esi, edi, pmap
@@ -159,18 +181,17 @@ Test1 PROC USES esi edi edx ecx,
 			mov edx, 0
 		.ENDIF
 
-		add esi, 1
-		INVOKE JudgeInGrid, esi, edi
+		add esi, delta_x
+		add edi, delta_y
 	.ENDW
 
 	mov ecx, xystate
-	.IF (edx == 0 && ecx == pturn)
+	.IF (edx == 0 && ecx == turn)
 		mov ebx, 1
-	.ELSE
-		mov ebx, 0
+		ret
 	.ENDIF
-	ret
-Test1 ENDP
+	jmp direction_loop_y
+TryStep ENDP
 
 ;----------------------------------------------------
 InitMap PROC, pturn:PTR DWORD, pmap:PTR DWORD, pblack_count:PTR DWORD, pwhite_count:PTR DWORD
@@ -243,7 +264,7 @@ main PROC
 	mov ad, eax
 	INVOKE GetXYAddress, ad, addr map
 
-	INVOKE Test1, 2, 4, addr map, 1 
+	INVOKE TryStep, 6, 4, addr map, 2
 
 	ret
 main ENDP
