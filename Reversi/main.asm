@@ -19,14 +19,20 @@ start:
 ;----------------------------------------------------
 InitMap PROC, pturn:PTR DWORD, pmap:PTR DWORD, pblack_count:PTR DWORD, pwhite_count:PTR DWORD
 ;initilize the var in main
-	;mov eax, [ebp+8]
-	;mov ebx, 1
-	;mov [eax], ebx
+	push eax
+	push ebx
+
 	mov eax, pturn
 	mov ebx, 1
 	mov [eax], ebx
-	mov [pblack_count], 2
-	mov [pwhite_count], 2
+
+	mov eax, pblack_count
+	mov ebx, 2
+	mov [eax], ebx
+
+	mov eax, pwhite_count
+	mov ebx, 2
+	mov [eax], ebx
 
 	mov ecx, 64
 	mov esi, 0
