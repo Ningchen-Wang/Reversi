@@ -251,21 +251,56 @@ InitMap PROC, pturn:PTR DWORD, pmap:PTR DWORD, pblack_count:PTR DWORD, pwhite_co
 	ret
 InitMap ENDP
 
+CheckEnd PROC USES ebx ecx edx, pmap:PTR DWORD, black_count: DWORD, white_count: DWORD
+;check if the game is finished, retval in eax, 0 means not finished, 1 means finished
+	.IF (black_count + white_count == 64)
+		mov eax, 1
+		ret
+	.ENDIF
+	mov ebx, pmap
+	mov ecx, 64
+check_loop:
+	mov edx, [ebx]
+	.IF (edx != 0)
+		loop check_loop
+	.ENDIF
+	INVOKE GetXYAddress, ebx, pmap
+	push eax
+	INVOKE TryStep, eax, edx, pmap, 1
+	.IF (eax == 1)
+		mov eax, 0
+		ret
+	.ENDIF
+	pop eax
+	INVOKE TryStep, eax, edx, pmap, 2
+	.IF (eax == 1)
+		mov eax, 0
+		ret
+	.ENDIF
+	add ebx, 4
+	loop check_loop
+	mov eax, 1
+	ret
+CheckEnd ENDP
+
 main PROC
 	local turn:DWORD 
 	local map[64]:DWORD
 	local black_count:DWORD
 	local white_count:DWORD
-	local ad:DWORD
 
 	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count
-	INVOKE GetMapAddress, 4, 4, addr map
+main_logic_loop:
+black_input:	
+	;INVOKE wait_black_input edx = input_x ebx = input_y
+	INVOKE TryStep, edx, ebx, addr map, turn
+	.IF (eax == 0)
+		jmp black_input
+	.ENDIF 
+	;INVOKE scan_map
+	INVOKE CheckEnd, addr map, black_count, white_count 
+white_input:
 	
-	mov ad, eax
-	INVOKE GetXYAddress, ad, addr map
-
-	INVOKE TryStep, 6, 4, addr map, 2
-
 	ret
 main ENDP
 END main
