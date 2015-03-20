@@ -404,15 +404,36 @@ direction_loop_y:
 	jmp direction_loop_y
 UpdateMap ENDP
 
+CopyMap PROC USES eax ecx edx,
+	pmap:PTR DWORD, pmap_copy:PTR DWORD
+;pmap is a pointer to map in main logic procedure
+;This procedure try to copy it to pmap_copy address
+;This procedure will not allocate memory for copy, it need procedure who call this allocate enough memory
+	mov ecx, 64
+copy_map_loop:
+	mov eax, pmap
+	add eax, ecx
+	sub eax, 1
+	mov eax, [eax]
+	mov edx, pmap_copy
+	add edx, ecx
+	sub edx, 1
+	mov [edx], eax
+	loop copy_map_loop
+	ret
+CopyMap ENDP
+
 main PROC
 	local turn:DWORD 
 	local map[64]:DWORD
 	local black_count:DWORD
 	local white_count:DWORD
+	local map_copy[64]:DWORD
 
 	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count
 main_logic_loop:
-black_input:	
+black_input:
+	INVOKE CopyMap, addr map, addr map_copy	
 	;INVOKE wait_black_input edx = input_x ebx = input_y
 	INVOKE TryStep, edx, ebx, addr map, turn
 	.IF (eax == 0)
@@ -420,8 +441,23 @@ black_input:
 	.ENDIF 
 	INVOKE UpdateMap, edx, ebx, addr map, turn
 	INVOKE CheckEnd, addr map, black_count, white_count 
+	mov eax, 3
+	sub eax, turn
+	mov turn, eax
 white_input:
-	
+	INVOKE CopyMap, addr map, addr map_copy
+	;INVOKE wait_white_input edx = input_x ebx = input_y
+	INVOKE TryStep, edx, ebx, addr map, turn
+	.IF (eax == 0)
+		jmp white_input
+	.ENDIF 
+	INVOKE UpdateMap, edx, ebx, addr map, turn
+	INVOKE CheckEnd, addr map, black_count, white_count 
+	mov eax, 3
+	sub eax, turn
+	mov turn, eax
+	jmp main_logic_loop
+		
 	ret
 main ENDP
 END main
