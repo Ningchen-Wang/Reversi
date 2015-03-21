@@ -323,6 +323,10 @@ direction_loop_y:
 	add esi, delta_x
 	mov edi, y
 	add edi, delta_y
+	INVOKE JudgeInGrid, esi, edi
+	.IF (eax == 0)
+		jmp direction_loop_y
+	.ENDIF
 	push esi
 	push edi
 	INVOKE GetMapAddress, esi, edi, pmap
@@ -408,7 +412,7 @@ CopyMap PROC USES eax ecx edx,
 	pmap:PTR DWORD, pmap_copy:PTR DWORD
 ;pmap is a pointer to map in main logic procedure
 ;This procedure try to copy it to pmap_copy address
-;This procedure will not allocate memory for copy, it need procedure who call this allocate enough memory
+;This procedure will not allocate memory for copy, it need procedure who call this to allocate enough memory
 	mov ecx, 64
 copy_map_loop:
 	mov eax, pmap
