@@ -8,14 +8,14 @@
 include \masm32\include\masm32rt.inc
 
 .data
-weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8,
-                   1, 1, 5, 4, 4, 5, 1, 1,
-				   6, 5, 3, 2, 2, 3, 5, 6,
-				   5, 4, 2, 0, 0, 2, 4, 5, 
-				   5, 4, 2, 0, 0, 2, 4, 5,
-				   6, 5, 3, 2, 2, 3, 5, 6,
-				   1, 1, 5, 4, 4, 5, 1, 1,
-				   8, 1, 6, 5, 5, 6, 1, 8
+;weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8,
+;                   1, 1, 5, 4, 4, 5, 1, 1,
+;				   6, 5, 3, 2, 2, 3, 5, 6,
+;				   5, 4, 2, 0, 0, 2, 4, 5, 
+;				   5, 4, 2, 0, 0, 2, 4, 5,
+;				   6, 5, 3, 2, 2, 3, 5, 6,
+;				   1, 1, 5, 4, 4, 5, 1, 1,
+;				   8, 1, 6, 5, 5, 6, 1, 8
 ;--------------------------------------------------------------------------
 .code
 start:
@@ -291,22 +291,43 @@ check_loop:
 CheckEnd ENDP
 
 UpdateMap PROC,
-	x:DWORD, y:DWORD, pmap:PTR DWORD, turn:DWORD
+	x:DWORD, y:DWORD, pmap:PTR DWORD, turn:DWORD, pblack_count:PTR DWORD, pwhite_count:PTR DWORD
 ;Update map when a player decide to choice (x,y) in this turn
 ;(x,y) must be a valid position
+;Update counters too
 	local opposite:DWORD
 	local delta_x:SDWORD
 	local delta_y:SDWORD
+	local delta_black: SDWORD
+	local delta_white: SDWORD
 
 	pushad
 	mov ebx, 3
 	sub ebx, turn
 	mov opposite, ebx
 
+	.IF (turn == 1)
+		mov delta_black, 1
+		mov delta_white, -1
+	.ELSE
+		mov delta_black, -1
+		mov delta_white, 1
+	.ENDIF
+
 	INVOKE GetMapAddress, x, y, pmap
 	mov esi, eax
 	mov eax, turn
-	mov [esi], eax	
+	mov [esi], eax
+	.IF (turn == 1)
+		mov eax, pblack_count
+	.ELSE
+		mov eax, pwhite_count
+	.ENDIF
+	push ebx
+	mov ebx, [eax]
+	add ebx, 1
+	mov [eax], ebx
+	pop ebx	
 
 	
 	mov delta_x, -2
@@ -397,6 +418,14 @@ direction_loop_y:
 				mov edx, 1
 				mov eax, turn
 				mov [esi], eax
+				mov eax, pblack_count
+				mov ebx, [eax]
+				add ebx, delta_black
+				mov [eax], ebx
+				mov eax, pwhite_count
+				mov ebx, [eax]
+				add ebx, delta_white
+				mov [eax], ebx
 				;need update map here
 			.ELSEIF
 				mov edx, 0
@@ -474,7 +503,7 @@ main PROC
 	local map_copy[64]:DWORD
 
 	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count
-
+	INVOKE UpdateMap, 3, 5, addr map, 1, addr black_count, addr white_count
 	;main_logic_loop:
 	;black_input:
 	;	INVOKE CopyMap, addr map, addr map_copy	
