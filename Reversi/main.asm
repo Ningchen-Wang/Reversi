@@ -443,19 +443,21 @@ direction_loop_y:
 	jmp direction_loop_y
 UpdateMap ENDP
 
-CopyMap PROC USES eax ecx edx,
+CopyMap PROC USES eax ebx ecx edx,
 	pmap:PTR DWORD, pmap_copy:PTR DWORD
 ;pmap is a pointer to map in main logic procedure
 ;This procedure try to copy it to pmap_copy address
 ;This procedure will not allocate memory for copy, it need procedure who call this to allocate enough memory
-	mov ecx, 256
+	mov ecx, 64
 copy_map_loop:
 	mov eax, pmap
-	add eax, ecx
+	mov ebx, ecx
+	shl ebx, 2
+	add eax, ebx
 	sub eax, 4
 	mov eax, [eax]
 	mov edx, pmap_copy
-	add edx, ecx
+	add edx, ebx
 	sub edx, 4
 	mov [edx], eax
 	loop copy_map_loop
