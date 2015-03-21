@@ -8,8 +8,14 @@
 include \masm32\include\masm32rt.inc
 
 .data
-
-
+weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8,
+                   1, 1, 5, 4, 4, 5, 1, 1,
+				   6, 5, 3, 2, 2, 3, 5, 6,
+				   5, 4, 2, 0, 0, 2, 4, 5, 
+				   5, 4, 2, 0, 0, 2, 4, 5,
+				   6, 5, 3, 2, 2, 3, 5, 6,
+				   1, 1, 5, 4, 4, 5, 1, 1,
+				   8, 1, 6, 5, 5, 6, 1, 8
 ;--------------------------------------------------------------------------
 .code
 start:
@@ -427,6 +433,39 @@ copy_map_loop:
 	ret
 CopyMap ENDP
 
+;------------------------------------------------------------------------------------------
+;AI Functions Part
+
+;findMaxValueAddress receives address of array and the length of array
+;return the index of the max value in eax
+findMaxValueAddress PROC USES esi ecx edx,
+	pValue:PTR DWORD, count:DWORD
+
+	local maxValue:DWORD
+	local maxValueAddress:DWORD
+
+	mov maxValue, 0
+	mov maxValueAddress, 0
+
+	mov ecx, count
+	mov esi, pValue
+	L1:
+		mov edx, [esi]
+		.IF (edx > maxValue)
+			mov maxValue, edx
+			mov maxValueAddress, esi
+		.ENDIF
+		add esi, 4
+		loop L1
+
+	mov eax, maxValueAddress
+	ret
+
+findMaxValueAddress ENDP
+
+
+;------------------------------------------------------------------------------------------
+
 main PROC
 	local turn:DWORD 
 	local map[64]:DWORD
@@ -435,32 +474,33 @@ main PROC
 	local map_copy[64]:DWORD
 
 	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count
-main_logic_loop:
-black_input:
-	INVOKE CopyMap, addr map, addr map_copy	
-	;INVOKE wait_black_input edx = input_x ebx = input_y
-	INVOKE TryStep, edx, ebx, addr map, turn
-	.IF (eax == 0)
-		jmp black_input
-	.ENDIF 
-	INVOKE UpdateMap, edx, ebx, addr map, turn
-	INVOKE CheckEnd, addr map, black_count, white_count 
-	mov eax, 3
-	sub eax, turn
-	mov turn, eax
-white_input:
-	INVOKE CopyMap, addr map, addr map_copy
-	;INVOKE wait_white_input edx = input_x ebx = input_y
-	INVOKE TryStep, edx, ebx, addr map, turn
-	.IF (eax == 0)
-		jmp white_input
-	.ENDIF 
-	INVOKE UpdateMap, edx, ebx, addr map, turn
-	INVOKE CheckEnd, addr map, black_count, white_count 
-	mov eax, 3
-	sub eax, turn
-	mov turn, eax
-	jmp main_logic_loop
+
+	;main_logic_loop:
+	;black_input:
+	;	INVOKE CopyMap, addr map, addr map_copy	
+	;	;INVOKE wait_black_input edx = input_x ebx = input_y
+	;	INVOKE TryStep, edx, ebx, addr map, turn
+	;	.IF (eax == 0)	
+	;		jmp black_input
+	;	.ENDIF 
+	;	INVOKE UpdateMap, edx, ebx, addr map, turn
+	;	INVOKE CheckEnd, addr map, black_count, white_count 
+	;	mov eax, 3
+	;	sub eax, turn
+	;	mov turn, eax
+	;white_input:
+	;	INVOKE CopyMap, addr map, addr map_copy
+	;	;INVOKE wait_white_input edx = input_x ebx = input_y
+	;	INVOKE TryStep, edx, ebx, addr map, turn
+	;	.IF (eax == 0)
+	;		jmp white_input
+	;	.ENDIF 
+	;	INVOKE UpdateMap, edx, ebx, addr map, turn
+	;	INVOKE CheckEnd, addr map, black_count, white_count 
+	;	mov eax, 3
+	;	sub eax, turn
+	;	mov turn, eax
+	;	jmp main_logic_loop
 		
 	ret
 main ENDP
