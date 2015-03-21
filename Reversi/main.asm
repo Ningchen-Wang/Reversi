@@ -11,8 +11,8 @@ include \masm32\include\masm32rt.inc
 weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8
              DWORD 1, 1, 5, 4, 4, 5, 1, 1
 			 DWORD 6, 5, 3, 2, 2, 3, 5, 6
-			 DWORD 5, 4, 2, 0, 0, 2, 4, 5
-			 DWORD 5, 4, 2, 0, 0, 2, 4, 5
+			 DWORD 5, 4, 2, 1, 1, 2, 4, 5
+			 DWORD 5, 4, 2, 1, 1, 2, 4, 5
 			 DWORD 6, 5, 3, 2, 2, 3, 5, 6
 			 DWORD 1, 1, 5, 4, 4, 5, 1, 1
 			 DWORD 8, 1, 6, 5, 5, 6, 1, 8
@@ -492,6 +492,78 @@ findMaxValueAddress PROC USES esi ecx edx,
 
 findMaxValueAddress ENDP
 
+;getEvaluateValue receives the map and the turn 
+;return the evaluate value in eax
+getEvaluateValue PROC USES ecx edi ebx edx esi,
+	pmap:PTR DWORD, turn:DWORD
+
+	mov ecx, 64
+	mov edi, 0
+	mov ebx, pmap
+	mov edx, OFFSET weightMatrix
+
+	L1:
+		mov esi, [ebx]
+		.IF (esi == turn)
+			add edi, [edx]
+		.ENDIF
+		add ebx, 4
+		add edx, 4
+		loop L1
+	mov eax, edi
+	ret
+getEvaluateValue ENDP
+
+;AIStep receives the map and the turn
+;return the best position (x, y)
+;x stored in eax, y stored in edx
+AIStep PROC USES ebx ecx esi edi,
+	pmap:PTR DWORD, turn:DWORD, pblack_count:DWORD, pwhite_count:DWORD
+	local value[64]:DWORD
+	local copy_Map[64]:DWORD
+	local lbcount:DWORD
+	local lwcount:DWORD
+
+	mov ebx, pblack_count
+	mov eax, [ebx]
+	mov lbcount, eax
+
+	mov ebx, pwhite_count
+	mov eax, [ebx]
+	mov lwcount, eax
+
+	mov ecx, 0
+	mov edi, 0
+	.WHILE (ecx < 8)
+		.WHILE (edi < 8)
+			INVOKE CopyMap, pmap, addr copy_Map
+			INVOKE TryStep, ecx, edi, copy_Map, turn
+			.IF (ebx == 0)
+				INVOKE GetMapAddress, ecx, edi, addr value
+				mov esi, 0
+				mov [eax], esi
+			.ELSE
+				INVOKE UpdateMap, ecx, edi, addr copy_Map, turn, addr lbcount, addr lwcount
+				INVOKE getEvaluateValue, copy_Map, turn
+				mov esi, eax
+				INVOKE GetMapAddress, ecx, edi, addr value
+				mov [eax], esi
+			.ENDIF
+			add edi, 1
+		.ENDW
+		add ecx, 1
+	.ENDW
+
+	INVOKE findMaxValueAddress, value, 64
+
+	mov esi, eax
+	INVOKE GetXYAddress, value, esi
+
+	;return x in eax and y in edx
+	ret
+AIStep ENDP
+
+
 
 ;------------------------------------------------------------------------------------------
 
@@ -503,7 +575,9 @@ main PROC
 	local map_copy[64]:DWORD
 
 	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count
-	INVOKE UpdateMap, 3, 5, addr map, 1, addr black_count, addr white_count
+	;INVOKE UpdateMap, 3, 5, addr map, 1, addr black_count, addr white_count
+	INVOKE AIStep, addr map, turn, addr black_count, addr white_count
+	INVOKE getEvaluateValue, addr map, 1
 	;main_logic_loop:
 	;black_input:
 	;	INVOKE CopyMap, addr map, addr map_copy	
