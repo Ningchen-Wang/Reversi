@@ -15,7 +15,7 @@ weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8
 			 DWORD 5, 4, 2, 1, 1, 2, 4, 5
 			 DWORD 6, 5, 3, 2, 2, 3, 5, 6
 			 DWORD 1, 1, 5, 4, 4, 5, 1, 1
-			 DWORD 8, 1, 6, 5, 5, 6, 1, 8
+			 DWORD 8, 1, 6, 5, 5, 6, 1, 8 
 ;--------------------------------------------------------------------------
 .code
 start:
@@ -269,11 +269,6 @@ CheckEnd PROC USES ebx ecx edx esi,
 	mov esi, pmap
 	mov ecx, 64
 check_loop:
-	mov edx, [esi]
-	.IF (edx == 1 || edx == 2)
-		loop check_loop
-		add esi, 4
-	.ENDIF
 	INVOKE GetXYAddress, esi, pmap
 	INVOKE TryStep, eax, edx, pmap, 1
 	.IF (ebx == 1)
@@ -566,7 +561,11 @@ AIStep PROC USES ebx ecx esi edi,
 	ret
 AIStep ENDP
 
-
+result PROC, 
+	pmap:PTR DWORD
+	mov eax, 1
+	ret
+result ENDP
 
 ;------------------------------------------------------------------------------------------
 
@@ -580,14 +579,6 @@ main PROC
 	local AI_y:DWORD
 
 	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count
-	;INVOKE getEvaluateValue, addr map, 1
-	;
-	;;AI step, x in eax, y in edx
-	;INVOKE AIStep, addr map, turn, addr black_count, addr white_count
-	;mov AI_x, eax
-	;mov AI_y, edx
-	;INVOKE UpdateMap, AI_x, AI_y, addr map, 1, addr black_count, addr white_count
-	;INVOKE getEvaluateValue, addr map, 1
 
 	main_logic_loop:
 	black_input:
@@ -624,6 +615,8 @@ main PROC
 		mov eax, 3
 		sub eax, turn
 		mov turn, eax
+
+		INVOKE result, addr map
 		jmp main_logic_loop
 		
 	ret
