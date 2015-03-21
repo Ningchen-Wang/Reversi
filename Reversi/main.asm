@@ -448,15 +448,15 @@ CopyMap PROC USES eax ecx edx,
 ;pmap is a pointer to map in main logic procedure
 ;This procedure try to copy it to pmap_copy address
 ;This procedure will not allocate memory for copy, it need procedure who call this to allocate enough memory
-	mov ecx, 64
+	mov ecx, 256
 copy_map_loop:
 	mov eax, pmap
 	add eax, ecx
-	sub eax, 1
+	sub eax, 4
 	mov eax, [eax]
 	mov edx, pmap_copy
 	add edx, ecx
-	sub edx, 1
+	sub edx, 4
 	mov [edx], eax
 	loop copy_map_loop
 	ret
@@ -533,18 +533,18 @@ AIStep PROC USES ebx ecx esi edi,
 	mov lwcount, eax
 
 	mov ecx, 0
-	mov edi, 0
 	.WHILE (ecx < 8)
+		mov edi, 0
 		.WHILE (edi < 8)
 			INVOKE CopyMap, pmap, addr copy_Map
-			INVOKE TryStep, ecx, edi, copy_Map, turn
+			INVOKE TryStep, ecx, edi, addr copy_Map, turn
 			.IF (ebx == 0)
 				INVOKE GetMapAddress, ecx, edi, addr value
 				mov esi, 0
 				mov [eax], esi
 			.ELSE
 				INVOKE UpdateMap, ecx, edi, addr copy_Map, turn, addr lbcount, addr lwcount
-				INVOKE getEvaluateValue, copy_Map, turn
+				INVOKE getEvaluateValue, addr copy_Map, turn
 				mov esi, eax
 				INVOKE GetMapAddress, ecx, edi, addr value
 				mov [eax], esi
@@ -554,10 +554,10 @@ AIStep PROC USES ebx ecx esi edi,
 		add ecx, 1
 	.ENDW
 
-	INVOKE findMaxValueAddress, value, 64
+	INVOKE findMaxValueAddress, addr value, 64
 
 	mov esi, eax
-	INVOKE GetXYAddress, value, esi
+	INVOKE GetXYAddress, esi, addr value
 
 	;return x in eax and y in edx
 	ret
@@ -573,11 +573,20 @@ main PROC
 	local black_count:DWORD
 	local white_count:DWORD
 	local map_copy[64]:DWORD
+	local AI_x:DWORD
+	local AI_y:DWORD
 
 	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count
 	;INVOKE UpdateMap, 3, 5, addr map, 1, addr black_count, addr white_count
-	INVOKE AIStep, addr map, turn, addr black_count, addr white_count
 	INVOKE getEvaluateValue, addr map, 1
+	
+	;AI step, x in eax, y in edx
+	INVOKE AIStep, addr map, turn, addr black_count, addr white_count
+	mov AI_x, eax
+	mov AI_y, edx
+	INVOKE UpdateMap, AI_x, AI_y, addr map, 1, addr black_count, addr white_count
+	INVOKE getEvaluateValue, addr map, 1
+
 	;main_logic_loop:
 	;black_input:
 	;	INVOKE CopyMap, addr map, addr map_copy	
