@@ -550,13 +550,7 @@ AIStep PROC USES ebx ecx esi edi,
 	ret
 AIStep ENDP
 
-;result PROC, 
-;	pmap:PTR DWORD
-;	mov eax, 1
-;	ret
-;result ENDP
-
-;------------------------------------------------------------------------------------------
+;------------------------------------------------------------------
 
 test PROC
 	local turn:DWORD 
