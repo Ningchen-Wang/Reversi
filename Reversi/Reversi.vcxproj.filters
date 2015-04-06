@@ -19,4 +19,25 @@
       <Filter>源文件</Filter>
     </MASM>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Reversi.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="backgroundfinal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Black.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="White.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
