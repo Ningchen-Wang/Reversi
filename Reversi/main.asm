@@ -60,7 +60,7 @@ start:
 	invoke WinMain, hInstance,NULL,CommandLine, SW_SHOWDEFAULT
 	invoke ExitProcess,eax
 
-	;call main
+	
 
 	exit
 

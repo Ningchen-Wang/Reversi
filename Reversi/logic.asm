@@ -558,58 +558,57 @@ AIStep ENDP
 
 ;------------------------------------------------------------------------------------------
 
-;main PROC
-;	local turn:DWORD 
-;	local map[64]:DWORD
-;	local black_count:DWORD
-;	local white_count:DWORD
-;	local map_copy[64]:DWORD
-;	local AI_x:DWORD
-;	local AI_y:DWORD
-;
-;	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count
-;
-;	main_logic_loop:
-;	black_input:
-;		INVOKE CopyMap, addr map, addr map_copy	
-;		INVOKE AIStep, addr map_copy, turn, addr black_count, addr white_count
-;		mov AI_x, eax
-;		mov AI_y, edx
-;		INVOKE TryStep, AI_x, AI_y, addr map, turn
-;		.IF (ebx == 0)	
-;			jmp black_input
-;		.ENDIF 
-;		INVOKE UpdateMap, AI_x, AI_y, addr map, turn, addr black_count, addr white_count
-;		INVOKE CheckEnd, addr map, black_count, white_count 
-;		.IF (eax == 1)
-;			ret
-;		.ENDIF
-;		mov eax, 3
-;		sub eax, turn
-;		mov turn, eax
-;	white_input:
-;		INVOKE CopyMap, addr map, addr map_copy
-;		INVOKE AIStep, addr map_copy, turn, addr black_count, addr white_count
-;		mov AI_x, eax
-;		mov AI_y, edx
-;		INVOKE TryStep, AI_x, AI_y, addr map, turn
-;		.IF (ebx == 0)
-;			jmp white_input
-;		.ENDIF 
-;		INVOKE UpdateMap, AI_x, AI_y, addr map, turn, addr black_count, addr white_count
-;		INVOKE CheckEnd, addr map, black_count, white_count 
-;		.IF (eax == 1)
-;			ret
-;		.ENDIF
-;		mov eax, 3
-;		sub eax, turn
-;		mov turn, eax
-;
-;		INVOKE result, addr map
-;		jmp main_logic_loop
-;		
-;	ret
-;main ENDP
-;END main
+test PROC
+	local turn:DWORD 
+	local map[64]:DWORD
+	local black_count:DWORD
+	local white_count:DWORD
+	local map_copy[64]:DWORD
+	local AI_x:DWORD
+	local AI_y:DWORD
+
+	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count
+
+	main_logic_loop:
+	black_input:
+		INVOKE CopyMap, addr map, addr map_copy	
+		INVOKE AIStep, addr map_copy, turn, addr black_count, addr white_count
+		mov AI_x, eax
+		mov AI_y, edx
+		INVOKE TryStep, AI_x, AI_y, addr map, turn
+		.IF (ebx == 0)	
+			jmp black_input
+		.ENDIF 
+		INVOKE UpdateMap, AI_x, AI_y, addr map, turn, addr black_count, addr white_count
+		INVOKE CheckEnd, addr map, black_count, white_count 
+		.IF (eax == 1)
+			ret
+		.ENDIF
+		mov eax, 3
+		sub eax, turn
+		mov turn, eax
+	white_input:
+		INVOKE CopyMap, addr map, addr map_copy
+		INVOKE AIStep, addr map_copy, turn, addr black_count, addr white_count
+		mov AI_x, eax
+		mov AI_y, edx
+		INVOKE TryStep, AI_x, AI_y, addr map, turn
+		.IF (ebx == 0)
+			jmp white_input
+		.ENDIF 
+		INVOKE UpdateMap, AI_x, AI_y, addr map, turn, addr black_count, addr white_count
+		INVOKE CheckEnd, addr map, black_count, white_count 
+		.IF (eax == 1)
+			ret
+		.ENDIF
+		mov eax, 3
+		sub eax, turn
+		mov turn, eax
+
+		INVOKE result, addr map
+		jmp main_logic_loop
+		
+	ret
+test ENDP
 
 END logic
