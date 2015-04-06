@@ -33,6 +33,8 @@ weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8
 			 DWORD 8, 1, 6, 5, 5, 6, 1, 8 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
+intX db 0
+intY db 0
 
 .data?
 hInstance HINSTANCE ?
@@ -40,6 +42,10 @@ CommandLine LPSTR ?
 hBitmap1 dd ?
 hBitmap2 dd ?
 hBitmap3 dd ?
+
+gridLen dd 50		;the length of grid
+gridOffsetX dd 50	;offset x to window
+gridOffsetY dd 50	;offset y to window
 
 ;--------------------------------------------------------------------------
 .code
@@ -150,17 +156,47 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke GetCursorPos,addr pos
 	  invoke ScreenToClient,hWnd,addr pos
 
-	  ;sub pos.x, 50
-	  ;sub pos.y, 50
+
+	  ;.if pos.x > 50 && pos.y > 50
+		;sub pos.x, 50
+		;sub pos.y, 50
+	  ;.else
+	  ;  ret
+	  ;.endif
+	  ;push eax
+	  ;mov eax, 0
+	  ;.while pos.x > 46
+		;sub pos.x, 46
+		;inc eax
+	  ;.endw
 	  ;
-	  ;mov ax, pos.x
-	  ;mov bl, 50
-	  ;div bl
-	  ;mov pos.x, al
-	  ;mul pos.x, 50
+	  ;push ebx
+	  ;mov ebx, 0
+	  ;.while pos.y > 46
+		;sub pos.y, 46
+		;inc ebx
+	  ;.endw
 	  ;
-	  ;add pos.x, 50
-	  ;add pos.y, 50
+	  ;mov pos.x, eax
+	  ;mov pos.y, ebx
+	  ;
+	  ;pop eax
+	  ;pop ebx
+	  ;
+	  ;mov eax, 46
+	  ;mul pos.x
+	  ;mov pos.x, eax
+	  ;
+	  ;mov eax, 46
+	  ;mul pos.y
+	  ;mov pos.y, eax
+	  ;
+	  ;add pos.x, 46
+	  ;add pos.y, 46
+	  
+
+
+	  
 
       invoke BitBlt,hdc,pos.x,pos.y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
       invoke DeleteDC,hMemDC
