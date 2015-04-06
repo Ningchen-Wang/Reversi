@@ -53,6 +53,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <MASM />
+    <MASM />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -69,6 +70,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <MASM Include="logic.asm" />
     <MASM Include="main.asm" />
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +83,9 @@
     <Image Include="backgroundfinal.bmp" />
     <Image Include="Black.bmp" />
     <Image Include="White.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="logic.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
