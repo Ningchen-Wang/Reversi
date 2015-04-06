@@ -157,42 +157,43 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke ScreenToClient,hWnd,addr pos
 
 
-	  ;.if pos.x > 50 && pos.y > 50
-		;sub pos.x, 50
-		;sub pos.y, 50
-	  ;.else
-	  ;  ret
-	  ;.endif
-	  ;push eax
-	  ;mov eax, 0
-	  ;.while pos.x > 46
-		;sub pos.x, 46
-		;inc eax
-	  ;.endw
-	  ;
-	  ;push ebx
-	  ;mov ebx, 0
-	  ;.while pos.y > 46
-		;sub pos.y, 46
-		;inc ebx
-	  ;.endw
-	  ;
-	  ;mov pos.x, eax
-	  ;mov pos.y, ebx
-	  ;
-	  ;pop eax
-	  ;pop ebx
-	  ;
-	  ;mov eax, 46
-	  ;mul pos.x
-	  ;mov pos.x, eax
-	  ;
-	  ;mov eax, 46
-	  ;mul pos.y
-	  ;mov pos.y, eax
-	  ;
-	  ;add pos.x, 46
-	  ;add pos.y, 46
+	  .if pos.x > 50 && pos.y > 50
+		sub pos.x, 50
+		sub pos.y, 50
+	  .else
+	    ret
+	  .endif
+
+	  push eax
+	  mov eax, 0
+	  .while pos.x > 46
+		sub pos.x, 46
+		inc eax
+	  .endw
+	  
+	  push ebx
+	  mov ebx, 0
+	  .while pos.y > 46
+		sub pos.y, 46
+		inc ebx
+	  .endw
+	  
+	  mov pos.x, eax
+	  mov pos.y, ebx
+	  
+	  pop eax
+	  pop ebx
+	  
+	  mov eax, 46
+	  mul pos.x
+	  mov pos.x, eax
+	  
+	  mov eax, 46
+	  mul pos.y
+	  mov pos.y, eax
+	  
+	  add pos.x, 46
+	  add pos.y, 46
 	  
 
 
