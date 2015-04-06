@@ -69,7 +69,7 @@ DrawWindow PROC
 DrawWindow ENDP
 
 
-
+; draw the window
 WinMain proc hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 
 	LOCAL wc:WNDCLASSEX
@@ -110,6 +110,40 @@ WinMain proc hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 	ret
 WinMain endp
 
+; change the pos of window to coord of grid
+; return the answer x,y to esi, edi
+PosToCoord PROC , x:DWORD, y:DWORD
+
+	  .if x < 50 || y < 50 || x > 46*8+50 || y > 46*8+50
+		ret
+	  .else
+		sub x, 50
+		sub y, 50	    
+	  .endif
+
+	  mov esi, 0
+	  .while x > 46
+		sub x, 46
+		inc esi
+	  .endw
+	  
+	  mov edi, 0
+	  .while y > 46
+		sub y, 46
+		inc edi
+	  .endw
+
+	  ret
+
+PosToCoord ENDP
+
+; draw one piece of chess
+;DrawOnePiece PROC USES eax, x: DWORD, y: DWORD, ps:PAINTSTRUCT, hdc:HDC, hMemDC:HDC, rect:RECT, hWnd:HWND
+;
+;   ret
+;DrawOnePiece ENDP
+
+
 WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
    LOCAL ps:PAINTSTRUCT
    LOCAL hdc:HDC
@@ -118,6 +152,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
    LOCAL pos:POINT
 
    .if uMsg==WM_CREATE
+	  ; load bitmap
 	  invoke LoadBitmap,hInstance,IDB_BITMAP1
       mov hBitmap1,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP2
@@ -134,8 +169,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       invoke GetClientRect,hWnd,addr rect
       invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
 
-	  ;invoke SelectObject,hMemDC,hBitmap2
-      ;invoke GetClientRect,hWnd,addr rect
+	  invoke SelectObject,hMemDC,hBitmap2
+      invoke GetClientRect,hWnd,addr rect
       ;invoke BitBlt,hdc,100,100,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
 	  ;invoke BitBlt,hdc,150,100,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
 	  ;invoke BitBlt,hdc,200,100,rect.right,rect.bottom,hMemDC,0,0,SRCAND
@@ -149,59 +184,42 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 	.elseif uMsg == WM_LBUTTONDOWN
 
-	  invoke GetClientRect,hWnd,addr rect
-	  invoke InvalidateRect, hWnd, addr rect, 0
-
-	  invoke BeginPaint,hWnd,addr ps
-      mov hdc,eax
-      invoke CreateCompatibleDC,hdc
-      mov hMemDC,eax
-	  invoke SelectObject,hMemDC,hBitmap2
-
 	  invoke GetCursorPos,addr pos
 	  invoke ScreenToClient,hWnd,addr pos
+	  invoke PosToCoord, pos.x, pos.y
 
 
-	  .if pos.x > 50 && pos.y > 50
-		sub pos.x, 50
-		sub pos.y, 50
-	  .else
-	    ret
-	  .endif
 
-	  push eax
-	  mov eax, 0
-	  .while pos.x > 46
-		sub pos.x, 46
-		inc eax
-	  .endw
-	  
-	  push ebx
-	  mov ebx, 0
-	  .while pos.y > 46
-		sub pos.y, 46
-		inc ebx
-	  .endw
-	  
-	  mov pos.x, eax
-	  mov pos.y, ebx
-	  
-	  pop eax
-	  pop ebx
-	  
-	  mov eax, 46
-	  mul pos.x
-	  mov pos.x, eax
-	  
-	  mov eax, 46
-	  mul pos.y
-	  mov pos.y, eax
-	  
-	  add pos.x, 46
-	  add pos.y, 46
-	  
-      invoke BitBlt,hdc,pos.x,pos.y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
-      invoke DeleteDC,hMemDC
+	  invoke PosToCoord, pos.x, pos.y
+
+	  ; pos is the coord(0-7)
+	  mov pos.x, esi
+	  mov pos.y, edi
+
+	  ;DrawOnePiece pos.x, pos.y, ps, hdc, hMemDC, rect, hWnd
+	     mov eax, 46
+   mul pos.x
+   mov pos.x, eax
+  
+   mov eax, 46
+   mul pos.y
+   mov pos.y, eax
+  
+   add pos.x, 50
+   add pos.y, 50
+
+   invoke GetClientRect,hWnd,addr rect
+   invoke InvalidateRect, hWnd, addr rect, 0
+
+   invoke BeginPaint,hWnd,addr ps
+   mov hdc,eax
+   invoke CreateCompatibleDC,hdc
+   mov hMemDC,eax
+   invoke SelectObject,hMemDC,hBitmap2
+
+   invoke BitBlt,hdc,pos.x,pos.y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+   invoke DeleteDC,hMemDC
+
 
 
    .elseif uMsg == WM_RBUTTONDOWN
@@ -217,6 +235,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 	  invoke GetCursorPos,addr pos
 	  invoke ScreenToClient,hWnd,addr pos
+
+
 
       invoke BitBlt,hdc,pos.x,pos.y,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
       invoke DeleteDC,hMemDC
