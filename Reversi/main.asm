@@ -6,7 +6,6 @@
 
 ;--------------------------------------------------------------------------
 include \masm32\include\masm32rt.inc
-
 include \masm32\include\windows.inc
 include \masm32\include\user32.inc
 include \masm32\include\kernel32.inc
@@ -18,7 +17,7 @@ include logic.inc
 
 
 WinMain proto :DWORD,:DWORD,:DWORD,:DWORD
-DrawGrid proto
+DrawWindow proto
 
 IDB_MAIN   equ 1
 IDB_BITMAP1 equ 101	;background
@@ -53,11 +52,11 @@ gridOffsetY dd 50	;offset y to window
 ;--------------------------------------------------------------------------
 .code
 start:
-	invoke DrawGrid
+	invoke DrawWindow
 	exit
 
 	
-DrawGrid PROC
+DrawWindow PROC
 
 	invoke GetModuleHandle, NULL
 	mov    hInstance,eax
@@ -67,7 +66,7 @@ DrawGrid PROC
 	invoke ExitProcess,eax
 
 	ret
-DrawGrid ENDP
+DrawWindow ENDP
 
 
 

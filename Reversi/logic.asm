@@ -552,7 +552,7 @@ AIStep ENDP
 
 ;------------------------------------------------------------------
 
-test PROC
+logicTest PROC
 	local turn:DWORD 
 	local map[64]:DWORD
 	local black_count:DWORD
@@ -599,10 +599,9 @@ test PROC
 		sub eax, turn
 		mov turn, eax
 
-		INVOKE result, addr map
 		jmp main_logic_loop
 		
 	ret
-test ENDP
+logicTest ENDP
 
 END logic
