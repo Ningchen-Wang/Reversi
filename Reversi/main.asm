@@ -18,6 +18,8 @@ include logic.inc
 
 
 WinMain proto :DWORD,:DWORD,:DWORD,:DWORD
+DrawGrid proto
+
 IDB_MAIN   equ 1
 IDB_BITMAP1 equ 101	;background
 IDB_BITMAP2 equ 102 ;Black
@@ -51,7 +53,11 @@ gridOffsetY dd 50	;offset y to window
 ;--------------------------------------------------------------------------
 .code
 start:
+	invoke DrawGrid
+	exit
+
 	
+DrawGrid PROC
 
 	invoke GetModuleHandle, NULL
 	mov    hInstance,eax
@@ -60,9 +66,8 @@ start:
 	invoke WinMain, hInstance,NULL,CommandLine, SW_SHOWDEFAULT
 	invoke ExitProcess,eax
 
-	
-
-	exit
+	ret
+DrawGrid ENDP
 
 
 
@@ -196,12 +201,9 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  add pos.x, 46
 	  add pos.y, 46
 	  
-
-
-	  
-
       invoke BitBlt,hdc,pos.x,pos.y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
       invoke DeleteDC,hMemDC
+
 
    .elseif uMsg == WM_RBUTTONDOWN
 
