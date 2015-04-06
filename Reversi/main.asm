@@ -14,6 +14,7 @@ include \masm32\include\gdi32.inc
 includelib \masm32\lib\user32.lib
 includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\gdi32.lib
+include logic.inc
 
 
 WinMain proto :DWORD,:DWORD,:DWORD,:DWORD
