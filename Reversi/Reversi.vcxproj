@@ -81,6 +81,7 @@
   <ItemGroup>
     <Image Include="backgroundfinal.bmp" />
     <Image Include="Black.bmp" />
+    <Image Include="Empty.bmp" />
     <Image Include="White.bmp" />
   </ItemGroup>
   <ItemGroup>
