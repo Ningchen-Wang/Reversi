@@ -138,10 +138,32 @@ PosToCoord PROC , x:DWORD, y:DWORD
 PosToCoord ENDP
 
 ; draw one piece of chess
-;DrawOnePiece PROC USES eax, x: DWORD, y: DWORD, ps:PAINTSTRUCT, hdc:HDC, hMemDC:HDC, rect:RECT, hWnd:HWND
-;
-;   ret
-;DrawOnePiece ENDP
+DrawOnePiece PROC USES eax, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:HDC, hMemDC:HDC, rect:RECT, hWnd:HWND
+   mov eax, 46
+   mul x
+   mov x, eax
+  
+   mov eax, 46
+   mul y
+   mov y, eax
+  
+   add x, 50
+   add  y, 50
+
+   invoke GetClientRect,hWnd,addr rect
+   invoke InvalidateRect, hWnd, addr rect, 0
+
+   invoke BeginPaint,hWnd,addr ps
+   mov hdc,eax
+   invoke CreateCompatibleDC,hdc
+   mov hMemDC,eax
+   invoke SelectObject,hMemDC,hBitmap2
+
+   invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+   invoke DeleteDC,hMemDC
+
+   ret
+DrawOnePiece ENDP
 
 
 WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
@@ -196,29 +218,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  mov pos.x, esi
 	  mov pos.y, edi
 
-	  ;DrawOnePiece pos.x, pos.y, ps, hdc, hMemDC, rect, hWnd
-	     mov eax, 46
-   mul pos.x
-   mov pos.x, eax
-  
-   mov eax, 46
-   mul pos.y
-   mov pos.y, eax
-  
-   add pos.x, 50
-   add pos.y, 50
-
-   invoke GetClientRect,hWnd,addr rect
-   invoke InvalidateRect, hWnd, addr rect, 0
-
-   invoke BeginPaint,hWnd,addr ps
-   mov hdc,eax
-   invoke CreateCompatibleDC,hdc
-   mov hMemDC,eax
-   invoke SelectObject,hMemDC,hBitmap2
-
-   invoke BitBlt,hdc,pos.x,pos.y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
-   invoke DeleteDC,hMemDC
+	  invoke DrawOnePiece, pos.x, pos.y, ps, hdc, hMemDC, rect, hWnd
 
 
 
