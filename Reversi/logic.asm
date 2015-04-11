@@ -246,8 +246,32 @@ InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD
 	ret
 InitMap ENDP
 
+CheckTurnEnd PROC, pmap: DWORD, turn: DWORD
+;Check if the next player have a valid grid to place his chessman, retval in eax, 0 means not have a valid grid, 1 means have
+	local next_turn: DWORD
+	pushad
+	mov eax, turn
+	mov ebx, 3
+	sub ebx, eax
+	mov next_turn, ebx
+	mov esi, pmap
+	mov ecx, 64
+check_loop:
+	INVOKE GetXYAddress, esi, pmap
+	INVOKE TryStep, eax, edx, pmap, next_turn
+	.IF (ebx == 1)
+		mov eax, 1
+		ret
+	.ENDIF
+	add esi, 4
+	loop check_loop
+	popad
+	mov eax, 0
+	ret
+CheckTurnEnd ENDP
+
 CheckEnd PROC USES ebx ecx edx esi, 
-	pmap:DWORD, black_count: DWORD, white_count: DWORD
+	pmap: DWORD, black_count: DWORD, white_count: DWORD
 ;check if the game is finished, retval in eax, 0 means not finished, 1 means finished
 	mov ebx, black_count
 	add ebx, white_count
@@ -255,22 +279,16 @@ CheckEnd PROC USES ebx ecx edx esi,
 		mov eax, 1
 		ret
 	.ENDIF
-	mov esi, pmap
-	mov ecx, 64
-check_loop:
-	INVOKE GetXYAddress, esi, pmap
-	INVOKE TryStep, eax, edx, pmap, 1
-	.IF (ebx == 1)
+	INVOKE CheckTurnEnd, pmap, 1
+	.IF (eax == 1)
 		mov eax, 0
 		ret
 	.ENDIF
-	INVOKE TryStep, eax, esi, pmap, 2
-	.IF (ebx == 1)
+	INVOKE CheckTurnEnd, pmap, 2
+	.IF (eax == 1)
 		mov eax, 0
 		ret
 	.ENDIF
-	add esi, 4
-	loop check_loop
 	mov eax, 1
 	ret
 CheckEnd ENDP
