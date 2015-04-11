@@ -198,31 +198,31 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 	  ;DrawOnePiece pos.x, pos.y, ps, hdc, hMemDC, rect, hWnd
 	     mov eax, 46
-   mul pos.x
-   mov pos.x, eax
+		mul pos.x
+		mov pos.x, eax
   
-   mov eax, 46
-   mul pos.y
-   mov pos.y, eax
+		mov eax, 46
+		mul pos.y
+		mov pos.y, eax
   
-   add pos.x, 50
-   add pos.y, 50
+		add pos.x, 50
+		add pos.y, 50
 
-   invoke GetClientRect,hWnd,addr rect
-   invoke InvalidateRect, hWnd, addr rect, 0
+		invoke GetClientRect,hWnd,addr rect
+		invoke InvalidateRect, hWnd, addr rect, 0
 
-   invoke BeginPaint,hWnd,addr ps
-   mov hdc,eax
-   invoke CreateCompatibleDC,hdc
-   mov hMemDC,eax
-   invoke SelectObject,hMemDC,hBitmap2
+		invoke BeginPaint,hWnd,addr ps
+		mov hdc,eax
+		invoke CreateCompatibleDC,hdc
+		mov hMemDC,eax
+		invoke SelectObject,hMemDC,hBitmap2
 
-   invoke BitBlt,hdc,pos.x,pos.y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
-   invoke DeleteDC,hMemDC
+		invoke BitBlt,hdc,pos.x,pos.y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+		invoke DeleteDC,hMemDC
 
 
 
-   .elseif uMsg == WM_RBUTTONDOWN
+	.elseif uMsg == WM_RBUTTONDOWN
 
 	  invoke GetClientRect,hWnd,addr rect
 	  invoke InvalidateRect, hWnd, addr rect, 0
