@@ -251,11 +251,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		jmp L1
 	  L2:
 
-	  ;invoke DrawOnePiece, 1, 3, 3, ps, hdc, hMemDC, rect, hWnd
-	  ;invoke DrawOnePiece, 1, 4, 4, ps, hdc, hMemDC, rect, hWnd
-	  ;invoke DrawOnePiece, 2, 3, 4, ps, hdc, hMemDC, rect, hWnd
-	  ;invoke DrawOnePiece, 2, 4, 3, ps, hdc, hMemDC, rect, hWnd
-
       invoke DeleteDC,hMemDC
 
 	.elseif uMsg == WM_LBUTTONDOWN
@@ -270,6 +265,42 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 	  .if (ebx == 1)
 		invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		invoke CopyMap, addr curMap, addr preMap
+		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+		      invoke BeginPaint,hWnd,addr ps
+      mov hdc,eax
+      invoke CreateCompatibleDC,hdc
+      mov hMemDC,eax
+      invoke SelectObject,hMemDC,hBitmap1
+      invoke GetClientRect,hWnd,addr rect
+      invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
+
+	  ;Invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
+
+	  L3:
+	  	.if coordY > 7
+			jmp L4
+		.endif
+	    invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+
+		invoke GetMapAddress, coordX, coordY, addr curMap
+		mov ebx, [eax]
+		.if ebx == 1
+			invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		.elseif ebx == 2
+			invoke DrawOnePiece, 2, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		.endif
+		
+		inc coordX
+		.if coordX > 7
+		    mov coordX, 0
+		    inc coordY
+		.endif
+		jmp L3
+	  L4:
+
+      invoke DeleteDC,hMemDC
+		
       .endif
 
 	.elseif uMsg==WM_DESTROY
