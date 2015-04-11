@@ -273,9 +273,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 	.elseif uMsg == WM_LBUTTONDOWN
 
-	invoke GetCursorPos,addr pos
-
-
 		.if (turn == 2)
 			ret
 		.endif
@@ -285,8 +282,17 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		   .if (eax == 1)
 				;showGameOver
 		   .endif
-		   invoke GetCursorPos,addr pos
-		   invoke ScreenToClient,hWnd,addr pos
+		   ;invoke GetCursorPos,addr pos
+		   ;invoke ScreenToClient,hWnd,addr pos
+		   push eax
+		   mov eax, lParam
+		   and eax, 0FFFFh
+		   mov pos.x, eax
+		   mov eax, lParam
+		   shr eax, 16
+		   and eax, 0FFFFh
+		   mov pos.y, eax
+		   pop eax
 		   invoke PosToCoord, pos.x, pos.y
 		   mov coordX, esi
 		   mov coordY, edi
