@@ -227,7 +227,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       invoke GetClientRect,hWnd,addr rect
       invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
 
-	  ;InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD
 	  Invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
 
 	  L1:
@@ -235,6 +234,15 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			jmp L2
 		.endif
 	    invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+
+		invoke GetMapAddress, coordX, coordY, addr curMap
+		mov ebx, [eax]
+		.if ebx == 1
+			invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		.elseif ebx == 2
+			invoke DrawOnePiece, 2, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		.endif
+		
 		inc coordX
 		.if coordX > 7
 		    mov coordX, 0
@@ -243,10 +251,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		jmp L1
 	  L2:
 
-	  invoke DrawOnePiece, 1, 3, 3, ps, hdc, hMemDC, rect, hWnd
-	  invoke DrawOnePiece, 1, 4, 4, ps, hdc, hMemDC, rect, hWnd
-	  invoke DrawOnePiece, 2, 3, 4, ps, hdc, hMemDC, rect, hWnd
-	  invoke DrawOnePiece, 2, 4, 3, ps, hdc, hMemDC, rect, hWnd
+	  ;invoke DrawOnePiece, 1, 3, 3, ps, hdc, hMemDC, rect, hWnd
+	  ;invoke DrawOnePiece, 1, 4, 4, ps, hdc, hMemDC, rect, hWnd
+	  ;invoke DrawOnePiece, 2, 3, 4, ps, hdc, hMemDC, rect, hWnd
+	  ;invoke DrawOnePiece, 2, 4, 3, ps, hdc, hMemDC, rect, hWnd
 
       invoke DeleteDC,hMemDC
 
@@ -258,21 +266,11 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  mov coordX, esi
 	  mov coordY, edi
 
-	  ;invoke TryStep, coordX, coordY, addr curMap, turn
+	  invoke TryStep, coordX, coordY, addr curMap, turn
 
-	  ;.if (ebx == 1)
+	  .if (ebx == 1)
 		invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-      ;.endif
-
-	.elseif uMsg == WM_RBUTTONDOWN
-
-	  invoke GetCursorPos,addr pos
-	  invoke ScreenToClient,hWnd,addr pos
-	  invoke PosToCoord, pos.x, pos.y
-	  mov coordX, esi
-	  mov coordY, edi
-
-	  invoke DrawOnePiece, 2, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+      .endif
 
 	.elseif uMsg==WM_DESTROY
       invoke DeleteObject,hBitmap1
