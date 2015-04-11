@@ -228,6 +228,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  mov pos.x, esi
 	  mov pos.y, edi
 
+
 	  invoke TryStep, pos.x, pos.y, addr curMap, turn
 
 	  .if (ebx == 1)
@@ -235,7 +236,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 	  .endif
 
-   .elseif uMsg == WM_RBUTTONDOWN
+
+	.elseif uMsg == WM_RBUTTONDOWN
 
 	  invoke GetCursorPos,addr pos
 	  invoke ScreenToClient,hWnd,addr pos
