@@ -172,7 +172,10 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
    invoke CreateCompatibleDC,hdc
    mov hMemDC,eax
 
-   .if color == 1
+   .if color == 0
+      invoke SelectObject,hMemDC,hBitmap4
+	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
+   .elseif color == 1
    invoke SelectObject,hMemDC,hBitmap4
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
 	  invoke SelectObject,hMemDC,hBitmap2
@@ -182,9 +185,7 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
       invoke SelectObject,hMemDC,hBitmap3
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
-   .elseif color == 3
-      invoke SelectObject,hMemDC,hBitmap4
-	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
+
    .endif
 
    
@@ -233,7 +234,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  	.if coordY > 7
 			jmp L2
 		.endif
-	    invoke DrawOnePiece, 3, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+	    invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 		inc coordX
 		.if coordX > 7
 		    mov coordX, 0
