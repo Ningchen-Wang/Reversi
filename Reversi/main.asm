@@ -26,14 +26,14 @@ IDB_BITMAP3 equ 103 ;White
 IDB_BITMAP4 equ 104 ;Empty
 
 .data
-weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8
+weightMatrix DWORD 9999, 1, 999, 15, 15, 999, 1, 9999
              DWORD 1, 1, 5, 4, 4, 5, 1, 1
-			 DWORD 6, 5, 3, 2, 2, 3, 5, 6
-			 DWORD 5, 4, 2, 1, 1, 2, 4, 5
-			 DWORD 5, 4, 2, 1, 1, 2, 4, 5
-			 DWORD 6, 5, 3, 2, 2, 3, 5, 6
+			 DWORD 999, 5, 99, 2, 2, 99, 5, 999
+			 DWORD 15, 4, 2, 1, 1, 2, 4, 15
+			 DWORD 15, 4, 2, 1, 1, 2, 4, 15
+			 DWORD 999, 5, 99, 2, 2, 99, 5, 999
 			 DWORD 1, 1, 5, 4, 4, 5, 1, 1
-			 DWORD 8, 1, 6, 5, 5, 6, 1, 8 
+			 DWORD 9999, 1, 999, 15, 15, 999, 1, 9999
 ;last time map
 preMap DWORD 64 DUP(0)
 ;current time map
@@ -302,6 +302,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		  .if (ebx == 1)
 			invoke CopyMap, addr curMap, addr preMap
 			invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+			invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			invoke CheckTurnEnd, addr curMap, 1
 			.if (eax == 1)
 				mov turn, 2
@@ -309,6 +310,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				;showMessage1
 				jmp loop1
 			.endif
+		  .elseif (ebx == 0)
+		    ret
 	      .endif
 
 	  loop2:
