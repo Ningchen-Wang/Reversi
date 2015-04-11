@@ -217,6 +217,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hBitmap3,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP4
       mov hBitmap4,eax
+
+	  Invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
 	  
    .elseif uMsg==WM_PAINT
       invoke BeginPaint,hWnd,addr ps
@@ -227,7 +229,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       invoke GetClientRect,hWnd,addr rect
       invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
 
-	  Invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
+	  
 
 	  L1:
 	  	.if coordY > 7
@@ -264,16 +266,16 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke TryStep, coordX, coordY, addr curMap, turn
 
 	  .if (ebx == 1)
-		invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		;invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 		invoke CopyMap, addr curMap, addr preMap
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
 		      invoke BeginPaint,hWnd,addr ps
       mov hdc,eax
       invoke CreateCompatibleDC,hdc
       mov hMemDC,eax
-      invoke SelectObject,hMemDC,hBitmap1
-      invoke GetClientRect,hWnd,addr rect
-      invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
+      ;invoke SelectObject,hMemDC,hBitmap1
+      ;invoke GetClientRect,hWnd,addr rect
+      ;invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
 
 	  ;Invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
 
