@@ -33,6 +33,14 @@ weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8
 			 DWORD 6, 5, 3, 2, 2, 3, 5, 6
 			 DWORD 1, 1, 5, 4, 4, 5, 1, 1
 			 DWORD 8, 1, 6, 5, 5, 6, 1, 8 
+;last time map
+preMap DWORD 64 DUP(0)
+;current time map
+curMap DWORD 64 DUP(0)
+black_count DWORD 0
+white_count DWORD 0
+turn DWORD 1
+
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
 intX db 0
@@ -159,10 +167,10 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
    invoke CreateCompatibleDC,hdc
    mov hMemDC,eax
 
-   .if color == 0
+   .if color == 1
 	  invoke SelectObject,hMemDC,hBitmap2
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
-   .elseif color == 1
+   .elseif color == 2
       invoke SelectObject,hMemDC,hBitmap3
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
    .endif
@@ -199,20 +207,20 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       invoke GetClientRect,hWnd,addr rect
       invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
 
+	  ;InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD
+	  Invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
 
-      ;invoke BitBlt,hdc,100,100,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
-	  ;invoke BitBlt,hdc,150,100,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
-	  ;invoke BitBlt,hdc,200,100,rect.right,rect.bottom,hMemDC,0,0,SRCAND
-	  ;
-	  ;invoke SelectObject,hMemDC,hBitmap3
-      ;invoke GetClientRect,hWnd,addr rect
-      ;invoke BitBlt,hdc,250,100,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
-	  ;invoke BitBlt,hdc,300,100,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
-	  ;invoke BitBlt,hdc,350,100,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+	  invoke DrawOnePiece, 1, 3, 3, ps, hdc, hMemDC, rect, hWnd
+	  invoke DrawOnePiece, 1, 4, 4, ps, hdc, hMemDC, rect, hWnd
+	  invoke DrawOnePiece, 2, 3, 4, ps, hdc, hMemDC, rect, hWnd
+	  invoke DrawOnePiece, 2, 4, 3, ps, hdc, hMemDC, rect, hWnd
+
+
       invoke DeleteDC,hMemDC
 
 	.elseif uMsg == WM_LBUTTONDOWN
 
+	  
 	  invoke GetCursorPos,addr pos
 	  invoke ScreenToClient,hWnd,addr pos
 	  invoke PosToCoord, pos.x, pos.y
@@ -220,7 +228,12 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  mov pos.x, esi
 	  mov pos.y, edi
 
-	  invoke DrawOnePiece, 0, pos.x, pos.y, ps, hdc, hMemDC, rect, hWnd
+	  invoke TryStep, pos.x, pos.y, addr curMap, turn
+
+	  .if (ebx == 1)
+		invoke DrawOnePiece, 1, pos.x, pos.y, ps, hdc, hMemDC, rect, hWnd
+
+	  .endif
 
    .elseif uMsg == WM_RBUTTONDOWN
 
@@ -231,7 +244,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  mov pos.x, esi
 	  mov pos.y, edi
 
-	  invoke DrawOnePiece, 1, pos.x, pos.y, ps, hdc, hMemDC, rect, hWnd
+	  invoke DrawOnePiece, 2, pos.x, pos.y, ps, hdc, hMemDC, rect, hWnd
 
 	.elseif uMsg==WM_DESTROY
       invoke DeleteObject,hBitmap1
