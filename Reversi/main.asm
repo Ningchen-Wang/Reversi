@@ -143,12 +143,21 @@ PosToCoord PROC , x:DWORD, y:DWORD
 		inc edi
 	  .endw
 
+	  sub edi, 7
+	  neg edi
+
+	  
+
 	  ret
 
 PosToCoord ENDP
 
 ; draw one piece of chess
 DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:HDC, hMemDC:HDC, rect:RECT, hWnd:HWND
+
+   sub y, 7
+   neg y
+
 
    mov eax, 48
    mul x
@@ -218,8 +227,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke LoadBitmap,hInstance,IDB_BITMAP4
       mov hBitmap4,eax
 
+	  INVOKE SetTimer, hWnd, 1, 200, NULL
 	  Invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
-	  
+   .elseif uMsg == WM_TIMER
+      invoke SendMessage, hWnd, WM_PAINT, 0, 0
    .elseif uMsg==WM_PAINT
       invoke BeginPaint,hWnd,addr ps
       mov hdc,eax
@@ -262,21 +273,55 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 	.elseif uMsg == WM_LBUTTONDOWN
 
-	  invoke GetCursorPos,addr pos
-	  invoke ScreenToClient,hWnd,addr pos
-	  invoke PosToCoord, pos.x, pos.y
-	  mov coordX, esi
-	  mov coordY, edi
+	invoke GetCursorPos,addr pos
 
-	  invoke TryStep, coordX, coordY, addr curMap, turn
 
-	  .if (ebx == 1)
+		.if (turn == 2)
+			ret
+		.endif
+
+		 loop1:
+		   invoke CheckEnd, addr curMap, addr black_count, addr white_count
+		   .if (eax == 1)
+				;showGameOver
+		   .endif
+		   invoke GetCursorPos,addr pos
+		   invoke ScreenToClient,hWnd,addr pos
+		   invoke PosToCoord, pos.x, pos.y
+		   mov coordX, esi
+		   mov coordY, edi
+
+		   invoke TryStep, coordX, coordY, addr curMap, turn
+
+		  .if (ebx == 1)
+			invoke CopyMap, addr curMap, addr preMap
+			invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+			invoke CheckTurnEnd, addr curMap, 1
+			.if (eax == 1)
+				mov turn, 2
+			.elseif (eax == 0)
+				;showMessage1
+				jmp loop1
+			.endif
+	      .endif
+
+	  loop2:
+		invoke CheckEnd, addr curMap, addr black_count, addr white_count
+		.if (eax == 1)
+			;showGameOver
+		.endif
 		invoke CopyMap, addr curMap, addr preMap
+		invoke AIStep, addr curMap, turn, addr black_count, addr white_count
+		mov coordX, eax
+		mov coordY, edx
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
-		;invoke BeginPaint,hWnd,addr ps
-		invoke SendMessage, hWnd, WM_PAINT, 0, 0
-
-      .endif
+		invoke CheckTurnEnd, addr curMap, 2
+		.if (eax == 1)
+			mov turn, 1
+		.elseif (eax == 0)
+			;showMessage2
+			jmp loop2
+		.endif
 
 	.elseif uMsg==WM_DESTROY
       invoke DeleteObject,hBitmap1
