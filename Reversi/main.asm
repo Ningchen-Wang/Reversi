@@ -228,21 +228,26 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       invoke SelectObject,hMemDC,hBitmap1
       invoke GetClientRect,hWnd,addr rect
       invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
-
 	  
-
 	  L1:
 	  	.if coordY > 7
 			jmp L2
 		.endif
-	    invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 
+		.if (black_count == 2 && white_count == 2)
+			invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		.endif
+	  
 		invoke GetMapAddress, coordX, coordY, addr curMap
 		mov ebx, [eax]
-		.if ebx == 1
-			invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		.elseif ebx == 2
-			invoke DrawOnePiece, 2, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		invoke GetMapAddress, coordX, coordY, addr preMap
+		mov ecx, [eax]
+		;.if ebx == 1
+		;	invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		;.elseif ebx == 2
+		;	invoke DrawOnePiece, 2, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		.if ebx != ecx
+			invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 		.endif
 		
 		inc coordX
@@ -266,43 +271,9 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke TryStep, coordX, coordY, addr curMap, turn
 
 	  .if (ebx == 1)
-		;invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 		invoke CopyMap, addr curMap, addr preMap
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
 		      invoke BeginPaint,hWnd,addr ps
-      mov hdc,eax
-      invoke CreateCompatibleDC,hdc
-      mov hMemDC,eax
-      ;invoke SelectObject,hMemDC,hBitmap1
-      ;invoke GetClientRect,hWnd,addr rect
-      ;invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
-
-	  ;Invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
-
-	  L3:
-	  	.if coordY > 7
-			jmp L4
-		.endif
-	    invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-
-		invoke GetMapAddress, coordX, coordY, addr curMap
-		mov ebx, [eax]
-		.if ebx == 1
-			invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		.elseif ebx == 2
-			invoke DrawOnePiece, 2, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		.endif
-		
-		inc coordX
-		.if coordX > 7
-		    mov coordX, 0
-		    inc coordY
-		.endif
-		jmp L3
-	  L4:
-
-      invoke DeleteDC,hMemDC
-		
       .endif
 
 	.elseif uMsg==WM_DESTROY
