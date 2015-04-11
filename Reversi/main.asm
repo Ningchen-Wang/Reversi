@@ -185,6 +185,7 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
       invoke SelectObject,hMemDC,hBitmap3
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+
    .endif
 
    
