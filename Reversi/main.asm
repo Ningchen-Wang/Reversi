@@ -273,7 +273,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  .if (ebx == 1)
 		invoke CopyMap, addr curMap, addr preMap
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
-		      invoke BeginPaint,hWnd,addr ps
+		;invoke BeginPaint,hWnd,addr ps
+		invoke SendMessage, hWnd, WM_PAINT, 0, 0
       .endif
 
 	.elseif uMsg==WM_DESTROY
