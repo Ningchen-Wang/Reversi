@@ -232,7 +232,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hBitmap4,eax
 
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
-	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, 0
+	  ;invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, 0
 	  .if (choice_mode == 2)
 		invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, 1
 	  .endif

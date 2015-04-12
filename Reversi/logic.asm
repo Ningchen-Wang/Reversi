@@ -302,7 +302,7 @@ InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD, i
 		invoke AIStep, pmap, 2, pblack_count, pwhite_count
 		mov x, eax
 		mov y, edx
-		invoke UpdateMap, x, y, 2, pmap, pblack_count, pwhite_count
+		invoke UpdateMap, x, y, pmap, 2, pblack_count, pwhite_count
 		mov esi, pblack_count
 		mov edi, [esi]
 		mov eax, 1
