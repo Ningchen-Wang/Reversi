@@ -40,8 +40,11 @@ preMap DWORD 64 DUP(0)
 curMap DWORD 64 DUP(0)
 black_count DWORD 0
 white_count DWORD 0
-turn DWORD 1
-choice_mode DWORD 1
+turn DWORD 2
+;choice_mode 1:vs computer,man first
+;choice_mode 2:vs computer,computer first
+;choice_mode 3:man vs man
+choice_mode DWORD 2
 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
@@ -229,7 +232,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hBitmap4,eax
 
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
-	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
+	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, 0
+	  .if (choice_mode == 2)
+		invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, 1
+	  .endif
    .elseif uMsg == WM_TIMER
 	  mov eax, wParam
 	  .if (eax == 2)
@@ -299,70 +305,115 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       invoke DeleteDC,hMemDC
 
 	.elseif uMsg == WM_LBUTTONDOWN
+		.if (choice_mode == 1 || choice_mode == 2)
+			.if (turn == 2)
+				ret
+			.endif
 
-		.if (turn == 2)
-			ret
-		.endif
+			 loop1:
+			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
+			   .if (eax == 1)
+					;showGameOver
+					ret
+			   .endif
+			   ;invoke GetCursorPos,addr pos
+			   ;invoke ScreenToClient,hWnd,addr pos
+			   push eax
+			   mov eax, lParam
+			   and eax, 0FFFFh
+			   mov pos.x, eax
+			   mov eax, lParam
+			   shr eax, 16
+			   and eax, 0FFFFh
+			   mov pos.y, eax
+			   pop eax
+			   invoke PosToCoord, pos.x, pos.y
+			   mov coordX, esi
+			   mov coordY, edi
 
-		 loop1:
-		   invoke CheckEnd, addr curMap, addr black_count, addr white_count
-		   .if (eax == 1)
+			   invoke TryStep, coordX, coordY, addr curMap, turn
+
+			  .if (ebx == 1)
+				invoke CopyMap, addr curMap, addr preMap
+				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+				invoke SendMessage, hWnd, WM_PAINT, 0, 0
+				invoke CheckTurnEnd, addr curMap, 1
+				.if (eax == 1)
+					mov turn, 2
+				.elseif (eax == 0)
+					;showMessage1
+					jmp loop1
+				.endif
+			  .elseif (ebx == 0)
+				ret
+			  .endif
+
+			  invoke SetTimer, hWnd, 2, 500, NULL
+			  ret
+
+		  loop2:
+			invoke CheckEnd, addr curMap, addr black_count, addr white_count
+			.if (eax == 1)
 				;showGameOver
-		   .endif
-		   ;invoke GetCursorPos,addr pos
-		   ;invoke ScreenToClient,hWnd,addr pos
-		   push eax
-		   mov eax, lParam
-		   and eax, 0FFFFh
-		   mov pos.x, eax
-		   mov eax, lParam
-		   shr eax, 16
-		   and eax, 0FFFFh
-		   mov pos.y, eax
-		   pop eax
-		   invoke PosToCoord, pos.x, pos.y
-		   mov coordX, esi
-		   mov coordY, edi
-
-		   invoke TryStep, coordX, coordY, addr curMap, turn
-
-		  .if (ebx == 1)
+				ret
+			.endif
 			invoke CopyMap, addr curMap, addr preMap
+			invoke AIStep, addr curMap, turn, addr black_count, addr white_count
+			mov coordX, eax
+			mov coordY, edx
 			invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
 			invoke SendMessage, hWnd, WM_PAINT, 0, 0
-			invoke CheckTurnEnd, addr curMap, 1
+			invoke CheckTurnEnd, addr curMap, 2
 			.if (eax == 1)
-				mov turn, 2
+				mov turn, 1
 			.elseif (eax == 0)
-				;showMessage1
-				jmp loop1
+				;showMessage2
+				jmp loop2
 			.endif
-		  .elseif (ebx == 0)
-		    ret
-	      .endif
+		.elseif (choice_mode == 3)
+			loop4:
+			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
+			   .if (eax == 1)
+					;showGameOver
+					ret
+			   .endif
+			   ;invoke GetCursorPos,addr pos
+			   ;invoke ScreenToClient,hWnd,addr pos
+			   push eax
+			   mov eax, lParam
+			   and eax, 0FFFFh
+			   mov pos.x, eax
+			   mov eax, lParam
+			   shr eax, 16
+			   and eax, 0FFFFh
+			   mov pos.y, eax
+			   pop eax
+			   invoke PosToCoord, pos.x, pos.y
+			   mov coordX, esi
+			   mov coordY, edi
 
-		  invoke SetTimer, hWnd, 2, 500, NULL
-		  ret
+			   invoke TryStep, coordX, coordY, addr curMap, turn
 
-	  loop2:
-		invoke CheckEnd, addr curMap, addr black_count, addr white_count
-		.if (eax == 1)
-			;showGameOver
+			  .if (ebx == 1)
+				invoke CopyMap, addr curMap, addr preMap
+				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+				invoke SendMessage, hWnd, WM_PAINT, 0, 0
+				invoke CheckTurnEnd, addr curMap, turn
+				.if (eax == 1)
+					mov ebx, 3
+					sub ebx, turn
+					mov turn, ebx
+				.elseif (eax == 0)
+					;showMessage3
+					jmp loop4
+				.endif
+			  .elseif (ebx == 0)
+				ret
+			  .endif
+
+			  invoke SetTimer, hWnd, 2, 500, NULL
+			  ret
 		.endif
-		invoke CopyMap, addr curMap, addr preMap
-		invoke AIStep, addr curMap, turn, addr black_count, addr white_count
-		mov coordX, eax
-		mov coordY, edx
-		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
-		invoke SendMessage, hWnd, WM_PAINT, 0, 0
-		invoke CheckTurnEnd, addr curMap, 2
-		.if (eax == 1)
-			mov turn, 1
-		.elseif (eax == 0)
-			;showMessage2
-			jmp loop2
-		.endif
-
 	.elseif uMsg==WM_DESTROY
       invoke DeleteObject,hBitmap1
 		invoke PostQuitMessage,NULL
