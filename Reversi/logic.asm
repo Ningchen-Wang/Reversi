@@ -189,7 +189,7 @@ direction_loop_y:
 TryStep ENDP
 
 ;----------------------------------------------------
-InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD, isComFirst:DWORD
+InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD, choice_mode:DWORD
 ;initilize the var in main
 	local x:DWORD
 	local y:DWORD
@@ -298,7 +298,7 @@ InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD, i
 ;	mov ebx, 2
 ;	mov [eax], ebx
 
-	.if (isComFirst == 1)
+	.if (choice_mode == 2)
 		invoke AIStep, pmap, 2, pblack_count, pwhite_count
 		mov x, eax
 		mov y, edx

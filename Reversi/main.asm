@@ -25,6 +25,11 @@ IDB_BITMAP2 equ 102 ;Black
 IDB_BITMAP3 equ 103 ;White
 IDB_BITMAP4 equ 104 ;Empty
 
+IDR_MENU1 equ 105
+ID_MODE1 equ 40001
+ID_MODE2 equ 40002
+ID_MODE3 equ 40003
+
 .data
 weightMatrix DWORD 9999, 1, 999, 15, 15, 999, 1, 9999
              DWORD 1, 1, 5, 4, 4, 5, 1, 1
@@ -53,6 +58,7 @@ intY db 0
 
 .data?
 hInstance HINSTANCE ?
+hMenu dd ?
 CommandLine LPSTR ?
 hBitmap1 dd ?
 hBitmap2 dd ?
@@ -106,9 +112,11 @@ WinMain proc hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 	invoke LoadCursor,NULL,IDC_ARROW
 	mov   wc.hCursor,eax
 	invoke RegisterClassEx, addr wc
+	invoke LoadMenu, hInstance, IDR_MENU1
+	mov hMenu,eax
 	INVOKE CreateWindowEx,NULL,ADDR ClassName,ADDR AppName,\
            WS_OVERLAPPEDWINDOW  and  not WS_MAXIMIZEBOX and not WS_THICKFRAME,50,\ ;CW_USEDEFAULT,\
-           50,670,489,NULL,NULL,\
+           50,670,489,NULL,hMenu,\
            hInst,NULL
 
 	mov   hwnd,eax
@@ -150,8 +158,6 @@ PosToCoord PROC , x:DWORD, y:DWORD
 	  sub edi, 7
 	  neg edi
 
-	  
-
 	  ret
 
 PosToCoord ENDP
@@ -161,7 +167,6 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
 
    sub y, 7
    neg y
-
 
    mov eax, 48
    mul x
@@ -184,24 +189,18 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
    mov hdc,eax
    invoke CreateCompatibleDC,hdc
    mov hMemDC,eax
-
-   .if color == 0
-      invoke SelectObject,hMemDC,hBitmap4
-	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
-   .elseif color == 1
+   
    invoke SelectObject,hMemDC,hBitmap4
-	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
+   invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
+
+   .if color == 1
 	  invoke SelectObject,hMemDC,hBitmap2
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
    .elseif color == 2
-   invoke SelectObject,hMemDC,hBitmap4
-	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
       invoke SelectObject,hMemDC,hBitmap3
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
-
    .endif
 
-   
    invoke DeleteDC,hMemDC
 
    ret
@@ -232,10 +231,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hBitmap4,eax
 
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
-	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, 0
-	  .if (choice_mode == 2)
-		invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, 1
-	  .endif
+	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
+
    .elseif uMsg == WM_TIMER
 	  mov eax, wParam
 	  .if (eax == 2)
@@ -264,6 +261,23 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  .endif
 
       invoke SendMessage, hWnd, WM_PAINT, 0, 0
+   .elseif uMsg==WM_COMMAND
+      .if wParam == ID_MODE1
+	      mov eax, 1
+		  mov choice_mode, eax
+		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
+		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
+	  .elseif wParam == ID_MODE2
+	      mov eax, 2
+		  mov choice_mode, eax
+		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
+		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
+	  .elseif wParam == ID_MODE3
+	  	  mov eax, 3
+		  mov choice_mode, eax
+		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
+		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
+	  .endif
    .elseif uMsg==WM_PAINT
       invoke BeginPaint,hWnd,addr ps
       mov hdc,eax
@@ -278,21 +292,27 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			jmp L2
 		.endif
 
-		.if ((black_count == 2 && white_count == 2) || (black_count == 1 && white_count == 4))
-			invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		.endif
+		;.if ((black_count == 2 && white_count == 2) || (black_count == 1 && white_count == 4))
+		;	invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		;.endif
 	  
 		invoke GetMapAddress, coordX, coordY, addr curMap
 		mov ebx, [eax]
 		invoke GetMapAddress, coordX, coordY, addr preMap
 		mov ecx, [eax]
+
 		;.if ebx == 1
-		;	invoke DrawOnePiece, 1, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		;	invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 		;.elseif ebx == 2
-		;	invoke DrawOnePiece, 2, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		.if ebx != ecx
-			invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		.endif
+		;	invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		;.elseif ebx == 0
+		;    invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+
+		invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+
+		;.if ebx != ecx
+		;	invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		;.endif
 		
 		inc coordX
 		.if coordX > 7
