@@ -44,7 +44,7 @@ turn DWORD 2
 ;choice_mode 1:vs computer,man first
 ;choice_mode 2:vs computer,computer first
 ;choice_mode 3:man vs man
-choice_mode DWORD 3
+choice_mode DWORD 2
 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
@@ -232,7 +232,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hBitmap4,eax
 
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
-	  ;invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, 0
+	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, 0
 	  .if (choice_mode == 2)
 		invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, 1
 	  .endif
