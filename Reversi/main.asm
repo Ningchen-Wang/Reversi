@@ -49,7 +49,7 @@ turn DWORD 2
 ;choice_mode 1:vs computer,man first
 ;choice_mode 2:vs computer,computer first
 ;choice_mode 3:man vs man
-choice_mode DWORD 2
+choice_mode DWORD 1
 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
