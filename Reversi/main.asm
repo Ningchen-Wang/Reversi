@@ -228,9 +228,35 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke LoadBitmap,hInstance,IDB_BITMAP4
       mov hBitmap4,eax
 
-	  INVOKE SetTimer, hWnd, 1, 200, NULL
-	  Invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
+	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
+	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count
    .elseif uMsg == WM_TIMER
+	  mov eax, wParam
+	  .if (eax == 2)
+		invoke KillTimer, hWnd, 2
+	  loop3:
+		invoke CheckEnd, addr curMap, addr black_count, addr white_count
+		.if (eax == 1)
+			;showGameOver
+		.endif
+		invoke CopyMap, addr curMap, addr preMap
+		invoke AIStep, addr curMap, turn, addr black_count, addr white_count
+		mov coordX, eax
+		mov coordY, edx
+		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+		invoke SendMessage, hWnd, WM_PAINT, 0, 0
+		invoke CheckTurnEnd, addr curMap, 2
+		.if (eax == 1)
+			mov turn, 1
+		.elseif (eax == 0)
+			;showMessage2
+			jmp loop3
+		.endif
+
+	  .else
+		ret
+	  .endif
+
       invoke SendMessage, hWnd, WM_PAINT, 0, 0
    .elseif uMsg==WM_PAINT
       invoke BeginPaint,hWnd,addr ps
@@ -315,6 +341,9 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		    ret
 	      .endif
 
+		  invoke SetTimer, hWnd, 2, 500, NULL
+		  ret
+
 	  loop2:
 		invoke CheckEnd, addr curMap, addr black_count, addr white_count
 		.if (eax == 1)
@@ -325,6 +354,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		mov coordX, eax
 		mov coordY, edx
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+		invoke SendMessage, hWnd, WM_PAINT, 0, 0
 		invoke CheckTurnEnd, addr curMap, 2
 		.if (eax == 1)
 			mov turn, 1

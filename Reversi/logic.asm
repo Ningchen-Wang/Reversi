@@ -239,6 +239,62 @@ InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD
 	mov ebx, 2
 	mov [eax], ebx
 
+;	mov ebx, 1
+;	L1:
+;		mov eax, pmap
+;		add eax, esi
+;		mov [eax], ebx
+;		add esi, 4
+;		loop L1
+;
+;	mov eax, pmap
+;	mov esi, 60
+;	add eax, esi
+;	mov ebx, 2
+;	mov [eax], ebx
+;
+;	mov eax, pmap
+;	mov esi, 92
+;	add eax, esi
+;	mov ebx, 2
+;	mov [eax], ebx
+;
+;	mov eax, pmap
+;	mov esi, 88
+;	add eax, esi
+;	mov ebx, 2
+;	mov [eax], ebx
+;
+;	mov eax, pmap
+;	mov esi, 120
+;	add eax, esi
+;	mov ebx, 2
+;	mov [eax], ebx
+;
+;	mov eax, pmap
+;	mov esi, 116
+;	add eax, esi
+;	mov ebx, 2
+;	mov [eax], ebx
+;
+;	mov eax, pmap
+;	mov esi, 148
+;	add eax, esi
+;	mov ebx, 2
+;	mov [eax], ebx
+;
+;	mov eax, pmap
+;	mov esi, 200
+;	add eax, esi
+;	mov ebx, 0
+;	mov [eax], ebx
+;
+;	mov eax, pmap
+;	mov esi, 204
+;	add eax, esi
+;	mov ebx, 2
+;	mov [eax], ebx
+
 	popad
 
 	;call GUI function
