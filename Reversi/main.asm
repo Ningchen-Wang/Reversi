@@ -278,7 +278,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			jmp L2
 		.endif
 
-		.if (black_count == 2 && white_count == 2)
+		.if ((black_count == 2 && white_count == 2) || (black_count == 1 && white_count == 4))
 			invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 		.endif
 	  
