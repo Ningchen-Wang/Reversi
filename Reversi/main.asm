@@ -41,6 +41,7 @@ curMap DWORD 64 DUP(0)
 black_count DWORD 0
 white_count DWORD 0
 turn DWORD 1
+choice_mode DWORD 1
 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
