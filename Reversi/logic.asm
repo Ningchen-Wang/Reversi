@@ -18,8 +18,9 @@ weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8
 			 DWORD 6, 5, 3, 2, 2, 3, 5, 6
 			 DWORD 1, 1, 5, 4, 4, 5, 1, 1
 			 DWORD 8, 1, 6, 5, 5, 6, 1, 8 
-logFile Byte "log.txt", 0
-logSyntax Byte "x = 0, y = 0, turn = 1", 0Dh, 0Ah, 0
+logFile BYTE "log.txt", 0
+turnSyntax BYTE "x = 0, y = 0, turn = 1", 0Dh, 0Ah, 0
+mapLineSyntax BYTE "00000000", 0Dh, 0Ah, 0
 .code
 
 logic:
@@ -727,7 +728,7 @@ AppendMapLog PROC,
 ;x,y: Coordinate of this turn
 ;turn: 1->black, 2->white
 	pushad
-	mov eax, OFFSET logSyntax
+	mov eax, OFFSET turnSyntax
 	add eax, 4
 	mov ebx, x
 	add ebx, 48
@@ -740,7 +741,28 @@ AppendMapLog PROC,
 	mov ebx, turn
 	add ebx, 48
 	mov [eax], bl
-	INVOKE AppendLog, hLog, addr logSyntax, 24 
+	INVOKE AppendLog, hLog, addr turnSyntax, 24 
+	mov ecx, 8
+	mov edx, pmap
+output_loop1:
+	mov edx, pmap
+	mov eax, ecx
+	sub eax, 1
+	shl eax, 2
+	add edx, eax
+	push ecx
+	mov ecx, 8	
+	mov eax, OFFSET mapLineSyntax
+output_loop2:
+	mov ebx, [edx]
+	add ebx, 48
+	mov [eax], bl
+	add edx, 32
+	add eax, 1
+	loop output_loop2
+	INVOKE AppendLog, hLog, addr mapLineSyntax, 10
+	pop ecx
+	loop output_loop1
 	popad
 	ret
 AppendMapLog ENDP
