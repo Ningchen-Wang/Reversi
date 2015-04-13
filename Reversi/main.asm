@@ -50,6 +50,7 @@ turn DWORD 2
 ;choice_mode 2:vs computer,computer first
 ;choice_mode 3:man vs man
 choice_mode DWORD 1
+hLog DWORD ?
 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
@@ -221,6 +222,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
    .if uMsg==WM_CREATE
 	  ; load bitmap
+	  invoke InitLog
+	  mov hLog, eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP1
       mov hBitmap1,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP2
@@ -247,6 +250,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		mov coordX, eax
 		mov coordY, edx
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+		invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 		invoke SendMessage, hWnd, WM_PAINT, 0, 0
 		invoke CheckTurnEnd, addr curMap, 2
 		.if (eax == 1)
@@ -356,6 +360,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			  .if (ebx == 1)
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 				invoke CheckTurnEnd, addr curMap, 1
 				.if (eax == 1)
@@ -382,6 +387,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			mov coordX, eax
 			mov coordY, edx
 			invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+			invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 			invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			invoke CheckTurnEnd, addr curMap, 2
 			.if (eax == 1)
@@ -417,6 +423,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			  .if (ebx == 1)
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 				invoke CheckTurnEnd, addr curMap, turn
 				.if (eax == 1)
@@ -434,6 +441,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			  ret
 		.endif
 	.elseif uMsg==WM_DESTROY
+	  invoke CloseHandle, hLog
       invoke DeleteObject,hBitmap1
 		invoke PostQuitMessage,NULL
 	  invoke DeleteObject,hBitmap2

@@ -1,3 +1,11 @@
+include \masm32\include\masm32rt.inc
+include \masm32\include\windows.inc
+include \masm32\include\user32.inc
+include \masm32\include\kernel32.inc
+include \masm32\include\gdi32.inc
+includelib \masm32\lib\user32.lib
+includelib \masm32\lib\kernel32.lib
+includelib \masm32\lib\gdi32.lib
 include logic.inc
 .MODEL Flat,StdCall
 OPTION CaseMap:None
@@ -10,6 +18,8 @@ weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8
 			 DWORD 6, 5, 3, 2, 2, 3, 5, 6
 			 DWORD 1, 1, 5, 4, 4, 5, 1, 1
 			 DWORD 8, 1, 6, 5, 5, 6, 1, 8 
+logFile Byte "log.txt", 0
+logSyntax Byte "x = 0, y = 0, turn = 1", 0Dh, 0Ah, 0
 .code
 
 logic:
@@ -691,5 +701,48 @@ logicTest PROC
 		
 	ret
 logicTest ENDP
+
+InitLog PROC
+;Create a log file. Name: logFile
+;Retval in eax in a handle of the log file
+	INVOKE CreateFile, addr logFile, FILE_APPEND_DATA, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL
+	ret
+InitLog ENDP
+
+AppendLog PROC,
+	hLog: DWORD, pstr: DWORD, strlength: DWORD
+;AppendLog into log file, hLog is the handle of log file, pstr is a pointer which point to the new log
+;len is the length of str 
+	pushad
+	INVOKE WriteFile, hLog, pstr, strlength, NULL, NULL
+	popad
+	ret
+AppendLog ENDP
+
+AppendMapLog PROC,
+	hLog: DWORD, pmap: DWORD, x: DWORD, y:DWORD, turn:DWORD
+;Append Map status to the log file
+;hLog: Handle of log file
+;pmap: Pointer of map
+;x,y: Coordinate of this turn
+;turn: 1->black, 2->white
+	pushad
+	mov eax, OFFSET logSyntax
+	add eax, 4
+	mov ebx, x
+	add ebx, 48
+	mov [eax], bl
+	add eax, 7
+	mov ebx, y
+	add ebx, 48
+	mov [eax], bl
+	add eax, 10
+	mov ebx, turn
+	add ebx, 48
+	mov [eax], bl
+	INVOKE AppendLog, hLog, addr logSyntax, 24 
+	popad
+	ret
+AppendMapLog ENDP
 
 END logic
