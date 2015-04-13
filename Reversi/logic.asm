@@ -341,6 +341,7 @@ check_loop:
 	INVOKE GetXYAddress, esi, pmap
 	INVOKE TryStep, eax, edx, pmap, next_turn
 	.IF (ebx == 1)
+		popad
 		mov eax, 1
 		ret
 	.ENDIF
