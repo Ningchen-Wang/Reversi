@@ -182,3 +182,4 @@ UpgradeLog*.htm
 # Microsoft Fakes
 FakesAssemblies/
 Reversi/Reversi.idc
+Reversi/log.txt
