@@ -115,7 +115,13 @@ _ProcDlgMain	proc	uses ebx edi esi hWnd,wMsg,wParam,lParam
 			invoke	EndDialog,hWnd,NULL
 		.elseif	eax == WM_INITDIALOG
 			invoke	LoadIcon,hInstance,IDI_ICON
+			mov ebx, lParam
+			mov ecx, 0
+			mov cx, bx
+			shr ebx, 16
 			invoke	SendMessage,hWnd,WM_SETICON,IDI_ICON,eax
+		.elseif eax == WM_PAINT
+			
 		.elseif	eax == WM_COMMAND
 			mov	eax,wParam
 			.if	ax == IDOK
@@ -390,6 +396,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
    .elseif uMsg == WM_TIMER
 	  mov eax, wParam
 
+
 	  ;;;;;;;;;;;;; Two Players
 	  .if (eax == 5)
 	      .if frameNum == 5
@@ -415,6 +422,9 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  .endif
 
 	  ;;;;;;;;;; AI
+
+	  push eax
+
 	  .if (eax == 4)
 	    .if frameNum == 5
 		    mov frameNum, 0
@@ -438,8 +448,11 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		    invoke SendMessage, hWnd, WM_PAINT, 0, 0
 	    .endif
 	  .endif
+	  pop eax
 
 	  ;;;;;;;;;;;;;; One Player
+
+	  push eax
 	  .if (eax == 3)
 	    .if frameNum == 5
 		    mov frameNum, 0
@@ -447,13 +460,17 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 			invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			.if (eax == 1)
-				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+				mov eax, black_count
+				shl eax, 16
+				or eax, white_count
+				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 				ret
 			.endif
 			invoke CheckTurnEnd, addr curMap, 1
 			.if (eax == 1)
 				mov turn, 2
+				invoke SetTimer, hWnd, 2, 500, NULL
 				;show message: keep turn
 			.endif
 
@@ -463,12 +480,17 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	    .endif
 	  .endif
 
+	  pop eax
+	  push eax
 	  .if (eax == 2)
 		invoke KillTimer, hWnd, 2
 	  loop3:
 		invoke CheckEnd, addr curMap, addr black_count, addr white_count
 		.if (eax == 1)
-			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+			mov eax, black_count
+			shl eax, 16
+			or eax, white_count
+			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
 			invoke SendMessage, hWnd, WM_PAINT, 0, 0
 		.endif
 		invoke CopyMap, addr curMap, addr preMap
@@ -487,7 +509,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		invoke AppendLog, hLog, addr updateLog, updateLogLength
 		invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 		invoke SendMessage, hWnd, WM_PAINT, 0, 0
-		
 
 	  .else
 		ret
@@ -640,7 +661,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			 loop1:
 			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			   .if (eax == 1)
-					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+					mov eax, black_count
+					shl eax, 16
+					or eax, white_count
+					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
 					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			   .endif
@@ -677,13 +701,15 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				ret
 			  .endif
 
-			  invoke SetTimer, hWnd, 2, 1500, NULL ; AI is thingking
 			  ret
 		.elseif (choice_mode == 3)
 			loop4:
 			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			   .if (eax == 1)
-					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+			   		mov eax, black_count
+					shl eax, 16
+					or eax, white_count
+					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
 					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			   .endif
@@ -710,9 +736,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				INVOKE SetTimer, hWnd, 5, 100, NULL
 				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
-				
+
 				.if EffectSwitch == 1
 					invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
+
 				.endif
 				
 			  .elseif (ebx == 0)
