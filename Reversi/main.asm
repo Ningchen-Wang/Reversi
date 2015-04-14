@@ -381,7 +381,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
 	  .elseif wParam == ID_MUSIC
 	  	  ;music
-		  invoke PlaySound, addr music, NULL, SND_FILENAME
+		  invoke PlaySound, addr music, NULL, SND_FILENAME or SND_ASYNC or SND_LOOP
 	  .elseif wParam == ID_SOUND
 	      ;sound	
 		  invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK	
