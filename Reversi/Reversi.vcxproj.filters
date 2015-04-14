@@ -45,7 +45,7 @@
     <Image Include="Empty.bmp">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="Big.ico">
+    <Image Include="taiji.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
