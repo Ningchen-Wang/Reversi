@@ -103,7 +103,7 @@ _ProcDlgMain	proc	uses ebx edi esi hWnd,wMsg,wParam,lParam
 			mov	eax,wParam
 			.if	ax == IDOK
 				invoke	EndDialog,hWnd,NULL
-				invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
+				invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
 		        invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			.else
 				invoke	EndDialog,hWnd,NULL
