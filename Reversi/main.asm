@@ -119,7 +119,7 @@ WinMain proc hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 	mov   wc.hbrBackground,COLOR_WINDOW+1
 	mov   wc.lpszMenuName,NULL
 	mov   wc.lpszClassName,OFFSET ClassName
-	invoke LoadIcon,hInstance,IDI_APPLICATION
+	invoke LoadIcon,hInstance,IDI_ICON
 	mov   wc.hIcon,eax
 	mov   wc.hIconSm,eax
 	invoke LoadCursor,NULL,IDC_ARROW
