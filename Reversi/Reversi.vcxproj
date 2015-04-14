@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="backgroundfinal.bmp" />
+    <Image Include="Big.ico" />
     <Image Include="Black.bmp" />
     <Image Include="Empty.bmp" />
     <Image Include="White.bmp" />

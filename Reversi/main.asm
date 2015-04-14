@@ -25,6 +25,8 @@ IDB_BITMAP2 equ 102 ;Black
 IDB_BITMAP3 equ 103 ;White
 IDB_BITMAP4 equ 104 ;Empty
 
+IDI_ICON equ 106
+
 IDR_MENU1 equ 105
 ID_MODE1   equ 40001
 ID_MODE2   equ 40002
@@ -74,6 +76,7 @@ hBitmap1 dd ?
 hBitmap2 dd ?
 hBitmap3 dd ?
 hBitmap4 dd ?
+hIcon    dd ?
 
 gridLen dd 50		;the length of grid
 gridOffsetX dd 50	;offset x to window
@@ -251,6 +254,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  ; load bitmap
 	  invoke InitLog
 	  mov hLog, eax
+	  invoke LoadIcon, hInstance, IDI_ICON
+	  mov hIcon, eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP1
       mov hBitmap1,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP2
