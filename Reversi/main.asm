@@ -1,8 +1,4 @@
 ;Reversi_main
-;Author: wangningchen, wangchengpeng
-;Create: 2015/3/18
-;Last modify: 2015/3/18
-;Main logic entry
 
 ;--------------------------------------------------------------------------
 include \masm32\include\masm32rt.inc
@@ -193,6 +189,7 @@ getScoreDigit PROC
 	div bx
 	mov wcountDigit1, ax
 	mov wcountDigit2, dx
+	ret
 getScoreDigit ENDP
 
 ; draw one piece of chess
@@ -216,16 +213,17 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
    inc y ;edge
 
    invoke GetClientRect,hWnd,addr rect
-   invoke InvalidateRect, hWnd, addr rect, 0
+   invoke InvalidateRect, hWnd, NULL, 0
 
    invoke BeginPaint,hWnd,addr ps
    mov hdc,eax
    invoke CreateCompatibleDC,hdc
    mov hMemDC,eax
    
-   invoke SelectObject,hMemDC,hBitmap4
-   invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
-
+   ;.if color == 0
+	   invoke SelectObject,hMemDC,hBitmap4
+	   invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
+   ;.endif
    .if color == 1
 	  invoke SelectObject,hMemDC,hBitmap2
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
@@ -326,6 +324,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
 	  .endif
    .elseif uMsg==WM_PAINT
+
+   	  invoke GetClientRect,hWnd,addr rect
+      invoke InvalidateRect, hWnd, NULL, 0
+
       invoke BeginPaint,hWnd,addr ps
       mov hdc,eax
       invoke CreateCompatibleDC,hdc
@@ -340,22 +342,11 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  	.if coordY > 7
 			jmp L2
 		.endif
-
-		;.if ((black_count == 2 && white_count == 2) || (black_count == 1 && white_count == 4))
-		;	invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		;.endif
 	  
 		invoke GetMapAddress, coordX, coordY, addr curMap
 		mov ebx, [eax]
 		invoke GetMapAddress, coordX, coordY, addr preMap
 		mov ecx, [eax]
-
-		;.if ebx == 1
-		;	invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		;.elseif ebx == 2
-		;	invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		;.elseif ebx == 0
-		;    invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 
 		invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 
@@ -371,18 +362,43 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		jmp L1
 	  L2:
 
+	  ;;;;;;;;;;;;;;;;;;;;;;;;;;
 	  ;Draw Score
+	  ;;;;;;;;;;;;;;;;;;;;;;;;;;
 	  invoke SelectObject,hMemDC,hBitmap2
 	  invoke BitBlt,hdc,460 ,160,rect.right,rect.bottom,hMemDC,0,0,SRCAND
 
       invoke SelectObject,hMemDC,hBitmap3
 	  invoke BitBlt,hdc,460,270,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+	  
+	  invoke getScoreDigit
 
 	  invoke SelectObject,hMemDC,hBitmap5
-	  invoke BitBlt,hdc,500,150,50,rect.bottom,hMemDC,0,0,SRCAND
-	  invoke BitBlt,hdc,500,270,50,rect.bottom,hMemDC,50,0,SRCAND
+
+	  mov ax, bcountDigit1
+	  mov bx, 60
+	  mul bx
+	  invoke BitBlt,hdc,520,150,60,70,hMemDC,ax,0,SRCAND
+	 
+
+
+	  mov ax, bcountDigit2
+	  mov bx, 60
+	  mul bx
+	  invoke BitBlt,hdc,520+45,150,60,70,hMemDC,ax,0,SRCCOPY;SRCAND
+
+	  mov ax, wcountDigit2
+	  mov bx, 60
+	  mul bx
+	  invoke BitBlt,hdc,520+45,250,60,70,hMemDC,ax,100,SRCCOPY;SRCPAINT
+
+	  	  mov ax, wcountDigit1
+	  mov bx, 60
+	  mul bx
+	  invoke BitBlt,hdc,520,250,60,70,hMemDC,ax,100,SRCPAINT
 
 	  ; Bitblt
+
 
       invoke DeleteDC,hMemDC
 	  invoke AppendLog, hLog, addr paintLog, paintLogLength
