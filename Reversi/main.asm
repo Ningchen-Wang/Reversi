@@ -309,10 +309,9 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
 	   .elseif frameNum == 4
 		  invoke SelectObject,hMemDC,hBitmapWhite1
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
-	   .elseif frameNum == 5
+	   .else;if frameNum == 5
 		  invoke SelectObject,hMemDC,hBitmap3
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
-		  invoke SelectObject,hMemDC,hBitmap3
 	   .endif
     .elseif turn == 1
        .if frameNum == 1
@@ -327,7 +326,7 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
 	   .elseif frameNum == 4
 		  invoke SelectObject,hMemDC,hBitmapBlack1
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
-	   .elseif frameNum == 5
+	   .else;if frameNum == 5
 		  invoke SelectObject,hMemDC,hBitmap2
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
 	   .endif
