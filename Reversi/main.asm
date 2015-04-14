@@ -37,6 +37,10 @@ preMap DWORD 64 DUP(0)
 curMap DWORD 64 DUP(0)
 black_count DWORD 0
 white_count DWORD 0
+bcountDigit1 WORD 0
+bcountDigit2 WORD 0
+wcountDigit1 WORD 0
+wcountDigit2 WORD 0
 turn DWORD 2
 ;choice_mode 1:vs computer,man first
 ;choice_mode 2:vs computer,computer first
@@ -162,6 +166,24 @@ PosToCoord PROC , x:DWORD, y:DWORD
 	  ret
 
 PosToCoord ENDP
+
+;get two digit of black_count and white_count
+;return to the bcount1, bcount2, wcount1, wcount2
+getScoreDigit PROC
+	mov dx, 0
+	mov eax, black_count
+	mov ebx, 10
+	div bx
+	mov bcountDigit1, ax
+	mov bcountDigit2, dx
+
+	mov dx, 0
+	mov eax, white_count
+	mov ebx, 10
+	div bx
+	mov wcountDigit1, ax
+	mov wcountDigit2, dx
+getScoreDigit ENDP
 
 ; draw one piece of chess
 DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:HDC, hMemDC:HDC, rect:RECT, hWnd:HWND

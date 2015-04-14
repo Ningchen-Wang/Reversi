@@ -716,7 +716,7 @@ AppendLog PROC,
 ;AppendLog into log file, hLog is the handle of log file, pstr is a pointer which point to the new log
 ;len is the length of str 
 	pushad
-	INVOKE WriteFile, hLog, pstr, strlength, NULL, NULL
+	;INVOKE WriteFile, hLog, pstr, strlength, NULL, NULL
 	popad
 	ret
 AppendLog ENDP
