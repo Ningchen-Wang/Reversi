@@ -69,6 +69,9 @@ mouseEventLogLength DWORD 13
 music1 BYTE "test", 0
 BGM BYTE "voice_chat_active.wav", 0
 Mp3Device db "MPEGVideo",0
+Mp3DeviceID DWORD 0
+EffectSwitch DWORD 0
+MusicSwitch DWORD 1
 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
@@ -380,6 +383,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  mov mciOpenParms.lpstrElementName, eax
 	  invoke mciSendCommand, 0, MCI_OPEN, MCI_OPEN_TYPE or MCI_OPEN_ELEMENT, addr mciOpenParms
 	  mov eax, mciOpenParms.wDeviceID
+	  mov Mp3DeviceID, eax
 	  mov ebx, eax
 	  invoke mciSendCommand, ebx, MCI_PLAY, 00010000h, addr mciPlayParms
 
@@ -448,7 +452,13 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		mov coordX, eax
 		mov coordY, edx
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+
 		INVOKE SetTimer, hWnd, 4, 50, NULL
+
+		.if EffectSwitch == 1
+			invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
+		.endif
+
 		invoke AppendLog, hLog, addr updateLog, updateLogLength
 		invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 		invoke SendMessage, hWnd, WM_PAINT, 0, 0
@@ -477,11 +487,20 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
 	  .elseif wParam == ID_MUSIC
 	  	  ;music
+		  mov eax, 1
+		  sub eax, MusicSwitch
+		  mov MusicSwitch, eax
+		  .if (eax == 1)
+			invoke mciSendCommand, Mp3DeviceID, MCI_PLAY, 00010000h, addr mciPlayParms
+		  .else
+			invoke mciSendCommand, Mp3DeviceID, MCI_PAUSE, 0, addr mciPlayParms 
+		  .endif
 	  .elseif wParam == ID_SOUND
-	      ;sound	
-		  invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC or SND_LOOP or SND_NOSTOP
-		  ;invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK	
-		  ;invoke SendMessage, hWnd, WM_PAINT, 0, 0  
+	      ;sound
+		  mov eax, 1
+		  sub eax, EffectSwitch
+		  mov EffectSwitch, eax	
+		  ;invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
 	  .elseif wParam == ID_STORY
 		  invoke MessageBox,hWnd,offset szStoryContent, offset szStoryTitle, MB_OK
 	  .elseif wParam == ID_RULE
@@ -621,22 +640,13 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			    INVOKE SetTimer, hWnd, 3, 50, NULL
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+				.if EffectSwitch == 1
+					invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
+				.endif
 				invoke AppendLog, hLog, addr updateLog, updateLogLength
 				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
-			    ;invoke CheckEnd, addr curMap, addr black_count, addr white_count
-			    ;.if (eax == 1)
-				;	invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
-				;	invoke SendMessage, hWnd, WM_PAINT, 0, 0
-				;	ret
-			    ;.endif
-				;invoke CheckTurnEnd, addr curMap, 1
-				;.if (eax == 1)
-				;	mov turn, 2
-				;.elseif (eax == 0)
-				;	;showMessage1
-				;	jmp loop1
-				;.endif
+
 			  .elseif (ebx == 0)
 				ret
 			  .endif
@@ -651,8 +661,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			   .endif
-			   ;invoke GetCursorPos,addr pos
-			   ;invoke ScreenToClient,hWnd,addr pos
+
 			   push eax
 			   mov eax, lParam
 			   and eax, 0FFFFh
@@ -671,6 +680,9 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			  .if (ebx == 1)
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+				.if EffectSwitch == 1
+					invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
+				.endif
 				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			    invoke CheckEnd, addr curMap, addr black_count, addr white_count
