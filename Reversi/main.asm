@@ -243,12 +243,12 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
    inc y ;edge
 
    invoke GetClientRect,hWnd,addr rect
-   invoke InvalidateRect, hWnd, NULL, 0
+   ;invoke InvalidateRect, hWnd, NULL, 0
 
-   invoke BeginPaint,hWnd,addr ps
-   mov hdc,eax
-   invoke CreateCompatibleDC,hdc
-   mov hMemDC,eax
+   ;invoke BeginPaint,hWnd,addr ps
+   ;mov hdc,eax
+   ;invoke CreateCompatibleDC,hdc
+   ;mov hMemDC,eax
    
 
    invoke SelectObject,hMemDC,hBitmap4
@@ -261,7 +261,7 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
    .endif
 
-   invoke DeleteDC,hMemDC
+   ;invoke DeleteDC,hMemDC
 
    ret
 DrawOnePiece ENDP
@@ -271,10 +271,12 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
    LOCAL ps:PAINTSTRUCT
    LOCAL hdc:HDC
    LOCAL hMemDC:HDC
+   LOCAL hImgDC:HDC
    LOCAL rect:RECT
    LOCAL pos:POINT
    LOCAL coordX:DWORD
    LOCAL coordY:DWORD
+   LOCAL hImg:HBITMAP
 
 
 
@@ -377,14 +379,19 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hdc,eax
       invoke CreateCompatibleDC,hdc
       mov hMemDC,eax
+	  invoke CreateCompatibleDC,hdc
+	  mov hImgDC,eax
+	  invoke CreateCompatibleBitmap, hdc, rect.right, rect.bottom
+	  mov hImg, eax
+	  invoke SelectObject, hMemDC, hImg
 
 	  ;invoke CreateCompatibleDC,hdc
 	  ;mov hImgDC,eax
 
 	  ;;;;Draw Background
-      invoke SelectObject,hMemDC,hBitmap1
+      invoke SelectObject,hImgDC,hBitmap1
       invoke GetClientRect,hWnd,addr rect
-      invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
+      invoke BitBlt,hMemDC,0,0,rect.right,rect.bottom,hImgDC,0,0,SRCCOPY
 	  
 	  ;;;; Draw Chess
 	  L1:
@@ -397,10 +404,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		invoke GetMapAddress, coordX, coordY, addr preMap
 		mov ecx, [eax]
 
-		invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		invoke DrawOnePiece, ebx, coordX, coordY, ps, hMemDC, hImgDC, rect, hWnd
 
 		;.if ebx != ecx
-		;	invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
+		;	invoke DrawOnePiece, ebx, coordX, coordY, ps, hMemDC, hImgDC, rect, hWnd
 		;.endif
 		
 		inc coordX
@@ -414,37 +421,42 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  ;;;;;;;;;;;;;;;;;;;;;;;;;;
 	  ;Draw Score
 	  ;;;;;;;;;;;;;;;;;;;;;;;;;;
-	  invoke SelectObject,hMemDC,hBitmap2
-	  invoke BitBlt,hdc,460 ,160,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+	  invoke SelectObject,hImgDC,hBitmap2
+	  invoke BitBlt,hMemDC,460 ,160,rect.right,rect.bottom,hImgDC,0,0,SRCAND
 
-      invoke SelectObject,hMemDC,hBitmap3
-	  invoke BitBlt,hdc,460,270,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+      invoke SelectObject,hImgDC,hBitmap3
+	  invoke BitBlt,hMemDC,460,270,rect.right,rect.bottom,hImgDC,0,0,SRCPAINT
 	  
 	  invoke getScoreDigit
 
-	  invoke SelectObject,hMemDC,hBitmap5
+	  invoke SelectObject,hImgDC,hBitmap5
 
 	  mov ax, bcountDigit1
 	  mov bx, 60
 	  mul bx
-	  invoke BitBlt,hdc,520,150,60,70,hMemDC,ax,0,SRCAND
+	  invoke BitBlt,hMemDC,520,150,60,70,hImgDC,ax,0,SRCAND
 	 
 	  mov ax, wcountDigit1
 	  mov bx, 60
 	  mul bx
-	  invoke BitBlt,hdc,520,150+100,60,70,hMemDC,ax,100,SRCPAINT
+	  invoke BitBlt,hMemDC,520,150+100,60,70,hImgDC,ax,100,SRCPAINT
 
 	  mov ax, bcountDigit2
 	  mov bx, 60
 	  mul bx
-	  invoke BitBlt,hdc,520+45,150,60,70,hMemDC,ax,0,SRCAND
+	  invoke BitBlt,hMemDC,520+45,150,60,70,hImgDC,ax,0,SRCAND
 
 	  mov ax, wcountDigit2
 	  mov bx, 60
 	  mul bx
-	  invoke BitBlt,hdc,520+45,150+100,60,70,hMemDC,ax,100,SRCPAINT
+	  invoke BitBlt,hMemDC,520+45,150+100,60,70,hImgDC,ax,100,SRCPAINT
+
+	  invoke BitBlt, hdc, 0, 0, rect.right, rect.bottom, hMemDC, 0 ,0, SRCCOPY
+
+	  invoke DeleteObject, hImg
 
       invoke DeleteDC,hMemDC
+	  invoke DeleteDC,hImgDC
 	  invoke EndPaint, hWnd, addr ps
 	  invoke AppendLog, hLog, addr paintLog, paintLogLength
 
