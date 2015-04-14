@@ -28,9 +28,9 @@ IDB_BLACK2  equ  111
 IDB_WHITE1  equ  112
 IDB_WHITE2  equ  113
 
-IDI_ICON equ 106
-IDR_MENU equ 105
-IDD_DIALOG equ 109
+IDI_ICON    equ 106
+IDR_MENU    equ 105
+IDD_DIALOG  equ 109
 
 ID_MODE1   equ 40001
 ID_MODE2   equ 40002
@@ -297,12 +297,22 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
 	   .endif
     .elseif turn == 2
-	   .if color == 1
-		  invoke SelectObject,hMemDC,hBitmap2
+       .if frameNum == 1
+		  invoke SelectObject,hMemDC,hBitmapBlack2
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
-	   .elseif color == 2
+	   .elseif frameNum == 2
+		  invoke SelectObject,hMemDC,hBitmapBlack1
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+	   .elseif frameNum == 3
+		  invoke SelectObject,hMemDC,hBitmapWhite2
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+	   .elseif frameNum == 4
+		  invoke SelectObject,hMemDC,hBitmapWhite1
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+	   .elseif frameNum == 5
 		  invoke SelectObject,hMemDC,hBitmap3
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+		  invoke SelectObject,hMemDC,hBitmap3
 	   .endif
     .elseif turn == 1
        .if frameNum == 1
@@ -341,7 +351,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
    LOCAL mciOpenParms : MCI_OPEN_PARMS
    LOCAL mciPlayParms : MCI_PLAY_PARMS
 
-
    mov coordX, 0
    mov coordY, 0
 
@@ -370,7 +379,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke LoadBitmap,hInstance,IDB_WHITE2
       mov hBitmapWhite2,eax
 
-	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
 	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
 
 	  mov eax, hWnd
@@ -387,6 +395,31 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
    .elseif uMsg == WM_TIMER
 	  mov eax, wParam
+	  .if (eax == 4)
+	    .if frameNum == 5
+		    mov frameNum, 0
+            invoke KillTimer, hWnd, 4
+
+			invoke CheckEnd, addr curMap, addr black_count, addr white_count
+			.if (eax == 1)
+				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+				invoke SendMessage, hWnd, WM_PAINT, 0, 0
+				ret
+			.endif
+			invoke CheckTurnEnd, addr curMap, 1
+			.if (eax == 1)
+				mov turn, 1
+			.else
+			    INVOKE SetTimer, hWnd, 4, 1000, NULL
+			.endif
+
+		.else
+			inc frameNum
+		    invoke SendMessage, hWnd, WM_PAINT, 0, 0
+	    .endif
+	  .endif
+
+
 
 	  .if (eax == 3)
 	    .if frameNum == 5
@@ -431,28 +464,16 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		mov coordX, eax
 		mov coordY, edx
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+
+		INVOKE SetTimer, hWnd, 4, 50, NULL
+
 		.if EffectSwitch == 1
 			invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
 		.endif
+
 		invoke AppendLog, hLog, addr updateLog, updateLogLength
 		invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 		invoke SendMessage, hWnd, WM_PAINT, 0, 0
-		invoke CheckEnd, addr curMap, addr black_count, addr white_count
-		.if (eax == 1)
-			mov eax, black_count
-			shl eax, 16
-			or eax, white_count
-			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
-			invoke SendMessage, hWnd, WM_PAINT, 0, 0
-			ret
-		.endif
-		invoke CheckTurnEnd, addr curMap, 2
-		.if (eax == 1)
-			mov turn, 1
-		.elseif (eax == 0)
-			;showMessage2
-			jmp loop3
-		.endif
 
 	  .else
 		ret
@@ -630,7 +651,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			   invoke TryStep, coordX, coordY, addr curMap, turn
 
 			  .if (ebx == 1)
-			    INVOKE SetTimer, hWnd, 3, 100, NULL
+			    INVOKE SetTimer, hWnd, 3, 50, NULL
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
 				.if EffectSwitch == 1
@@ -639,56 +660,13 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				invoke AppendLog, hLog, addr updateLog, updateLogLength
 				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
-			    ;invoke CheckEnd, addr curMap, addr black_count, addr white_count
-			    ;.if (eax == 1)
-				;	invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
-				;	invoke SendMessage, hWnd, WM_PAINT, 0, 0
-				;	ret
-			    ;.endif
-				;invoke CheckTurnEnd, addr curMap, 1
-				;.if (eax == 1)
-				;	mov turn, 2
-				;.elseif (eax == 0)
-				;	;showMessage1
-				;	jmp loop1
-				;.endif
+
 			  .elseif (ebx == 0)
 				ret
 			  .endif
 
 			  invoke SetTimer, hWnd, 2, 1500, NULL
 			  ret
-
-		  loop2:
-			invoke CheckEnd, addr curMap, addr black_count, addr white_count
-			.if (eax == 1)
-				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
-				invoke SendMessage, hWnd, WM_PAINT, 0, 0
-				ret
-			.endif
-			invoke CopyMap, addr curMap, addr preMap
-			invoke AIStep, addr curMap, turn, addr black_count, addr white_count
-			mov coordX, eax
-			mov coordY, edx
-			invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
-			.if EffectSwitch == 1
-				invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
-			.endif			
-			invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
-			invoke SendMessage, hWnd, WM_PAINT, 0, 0
-			invoke CheckEnd, addr curMap, addr black_count, addr white_count
-			.if (eax == 1)
-				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
-				invoke SendMessage, hWnd, WM_PAINT, 0, 0
-				ret
-			.endif
-			invoke CheckTurnEnd, addr curMap, 2
-			.if (eax == 1)
-				mov turn, 1
-			.elseif (eax == 0)
-				;showMessage2
-				jmp loop2
-			.endif
 		.elseif (choice_mode == 3)
 			loop4:
 			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
@@ -700,8 +678,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			   .endif
-			   ;invoke GetCursorPos,addr pos
-			   ;invoke ScreenToClient,hWnd,addr pos
+
 			   push eax
 			   mov eax, lParam
 			   and eax, 0FFFFh
