@@ -24,6 +24,7 @@ IDB_BITMAP1 equ 101	;background
 IDB_BITMAP2 equ 102 ;Black
 IDB_BITMAP3 equ 103 ;White
 IDB_BITMAP4 equ 104 ;Empty
+IDB_BITMAP5 equ 108 ;Number
 
 IDI_ICON equ 106
 
@@ -76,6 +77,7 @@ hBitmap1 dd ?
 hBitmap2 dd ?
 hBitmap3 dd ?
 hBitmap4 dd ?
+hBitmap5 dd ?
 hIcon    dd ?
 
 gridLen dd 50		;the length of grid
@@ -264,6 +266,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hBitmap3,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP4
       mov hBitmap4,eax
+	  invoke LoadBitmap,hInstance,IDB_BITMAP5
+      mov hBitmap5,eax
 
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
 	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
@@ -330,6 +334,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       invoke GetClientRect,hWnd,addr rect
       invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
 	  
+
+	  ; Draw Chess
 	  L1:
 	  	.if coordY > 7
 			jmp L2
@@ -364,6 +370,19 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		.endif
 		jmp L1
 	  L2:
+
+	  ;Draw Score
+	  invoke SelectObject,hMemDC,hBitmap2
+	  invoke BitBlt,hdc,460 ,160,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+
+      invoke SelectObject,hMemDC,hBitmap3
+	  invoke BitBlt,hdc,460,270,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+
+	  invoke SelectObject,hMemDC,hBitmap5
+	  invoke BitBlt,hdc,500,150,50,rect.bottom,hMemDC,0,0,SRCAND
+	  invoke BitBlt,hdc,500,270,50,rect.bottom,hMemDC,50,0,SRCAND
+
+	  ; Bitblt
 
       invoke DeleteDC,hMemDC
 	  invoke AppendLog, hLog, addr paintLog, paintLogLength
