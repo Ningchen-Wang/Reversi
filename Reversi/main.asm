@@ -279,7 +279,7 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
    .if ebx > 0
        ;invoke SelectObject,hMemDC,hBitmap2
    .endif
-   .if ebx == ecx
+   .if ebx == ecx || ecx == 0
 	   .if color == 1
 		  invoke SelectObject,hMemDC,hBitmap2
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
@@ -364,9 +364,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
 	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
 
-<<<<<<< HEAD
-=======
-
 	  mov eax, hWnd
 	  mov mciPlayParms.dwCallback, eax
 	  mov eax, OFFSET Mp3Device
@@ -378,7 +375,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  mov ebx, eax
 	  invoke mciSendCommand, ebx, MCI_PLAY, 00010000h, addr mciPlayParms
 
->>>>>>> origin/master
    .elseif uMsg == WM_TIMER
 	  mov eax, wParam
 

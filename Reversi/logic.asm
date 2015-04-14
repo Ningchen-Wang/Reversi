@@ -332,6 +332,7 @@ InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD, c
 	.endif
 
 	;call GUI function
+	INVOKE CopyMap, pmap, pmap_pre
 	popad
 
 	ret
