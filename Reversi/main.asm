@@ -6,9 +6,11 @@ include \masm32\include\windows.inc
 include \masm32\include\user32.inc
 include \masm32\include\kernel32.inc
 include \masm32\include\gdi32.inc
+include \masm32\include\winmm.inc
 includelib \masm32\lib\user32.lib
 includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\gdi32.lib
+includelib \masm32\lib\winmm.lib
 include logic.inc
 
 WinMain proto :DWORD,:DWORD,:DWORD,:DWORD
@@ -64,6 +66,9 @@ updateLogLength DWORD 12
 paintLogLength DWORD 14
 aiLogLength DWORD 9
 mouseEventLogLength DWORD 13
+music1 BYTE "test", 0
+BGM BYTE "voice_chat_active.wav", 0
+Mp3Device db "MPEGVideo",0
 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
@@ -324,7 +329,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
    LOCAL coordX:DWORD
    LOCAL coordY:DWORD
    LOCAL hImg:HBITMAP
-
+   LOCAL mciOpenParms : MCI_OPEN_PARMS
+   LOCAL mciPlayParms : MCI_PLAY_PARMS
 
 
    mov coordX, 0
@@ -358,6 +364,21 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
 	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
 
+<<<<<<< HEAD
+=======
+
+	  mov eax, hWnd
+	  mov mciPlayParms.dwCallback, eax
+	  mov eax, OFFSET Mp3Device
+	  mov mciOpenParms.lpstrDeviceType, eax
+	  mov eax, OFFSET BGM
+	  mov mciOpenParms.lpstrElementName, eax
+	  invoke mciSendCommand, 0, MCI_OPEN, MCI_OPEN_TYPE or MCI_OPEN_ELEMENT, addr mciOpenParms
+	  mov eax, mciOpenParms.wDeviceID
+	  mov ebx, eax
+	  invoke mciSendCommand, ebx, MCI_PLAY, 00010000h, addr mciPlayParms
+
+>>>>>>> origin/master
    .elseif uMsg == WM_TIMER
 	  mov eax, wParam
 
@@ -440,8 +461,9 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  	  ;music
 	  .elseif wParam == ID_SOUND
 	      ;sound	
-		  invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK	
-		  invoke SendMessage, hWnd, WM_PAINT, 0, 0  
+		  invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC or SND_LOOP or SND_NOSTOP
+		  ;invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK	
+		  ;invoke SendMessage, hWnd, WM_PAINT, 0, 0  
 	  .elseif wParam == ID_STORY
 		  invoke MessageBox,hWnd,offset szStoryContent, offset szStoryTitle, MB_OK
 	  .elseif wParam == ID_RULE
