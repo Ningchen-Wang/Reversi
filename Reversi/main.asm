@@ -440,6 +440,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke BitBlt,hdc,520+45,150+100,60,70,hMemDC,ax,100,SRCPAINT
 
       invoke DeleteDC,hMemDC
+	  invoke EndPaint, hWnd, addr ps
 	  invoke AppendLog, hLog, addr paintLog, paintLogLength
 
 	.elseif uMsg == WM_LBUTTONDOWN
