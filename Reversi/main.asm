@@ -67,7 +67,9 @@ paintLogLength DWORD 14
 aiLogLength DWORD 9
 mouseEventLogLength DWORD 13
 music1 BYTE "test", 0
-BGM BYTE "voice_chat_active.wav", 0
+soundMan BYTE "soundMan", 0
+soundWoman BYTE "soundWoman", 0
+BGM BYTE "bgmusic.wav", 0
 Mp3Device db "MPEGVideo",0
 Mp3DeviceID DWORD 0
 EffectSwitch DWORD 0
@@ -517,7 +519,13 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		INVOKE SetTimer, hWnd, 4, 50, NULL
 
 		.if EffectSwitch == 1
-			invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
+			;invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
+			.if turn == 1
+			    invoke PlaySound, addr soundWoman, NULL, SND_FILENAME or SND_ASYNC
+			.else
+			    invoke PlaySound, addr soundMan, NULL, SND_FILENAME or SND_ASYNC
+			.endif
+
 		.endif
 
 		invoke AppendLog, hLog, addr updateLog, updateLogLength
@@ -705,7 +713,12 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
 				INVOKE SetTimer, hWnd, 3, 50, NULL
 				.if EffectSwitch == 1
-					invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
+					;invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
+					.if turn == 1
+						invoke PlaySound, addr soundWoman, NULL, SND_FILENAME or SND_ASYNC
+					.else
+						invoke PlaySound, addr soundMan, NULL, SND_FILENAME or SND_ASYNC
+					.endif
 				.endif
 				invoke AppendLog, hLog, addr updateLog, updateLogLength
 				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
@@ -752,8 +765,12 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 
 				.if EffectSwitch == 1
-					invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
-
+					;invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
+					.if turn == 1
+						invoke PlaySound, addr soundWoman, NULL, SND_FILENAME or SND_ASYNC
+					.else
+						invoke PlaySound, addr soundMan, NULL, SND_FILENAME or SND_ASYNC
+					.endif
 				.endif
 				
 			  .elseif (ebx == 0)
