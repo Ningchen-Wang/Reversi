@@ -389,6 +389,32 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
    .elseif uMsg == WM_TIMER
 	  mov eax, wParam
+
+	  ;;;;;;;;;;;;; Two Players
+	  .if (eax == 5)
+	      .if frameNum == 5
+		      mov frameNum, 0
+			  invoke KillTimer, hWnd, 5
+
+			  invoke CheckEnd, addr curMap, addr black_count, addr white_count
+			  .if (eax == 1)
+				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+				invoke SendMessage, hWnd, WM_PAINT, 0, 0
+				ret
+			  .endif
+			  invoke CheckTurnEnd, addr curMap, turn
+			  .if (eax == 1)
+			  	mov ebx, 3
+			  	sub ebx, turn
+			  	mov turn, ebx
+			  .endif
+		  .else
+		  	  inc frameNum
+		      invoke SendMessage, hWnd, WM_PAINT, 0, 0
+	      .endif
+	  .endif
+
+	  ;;;;;;;;;; AI
 	  .if (eax == 4)
 	    .if frameNum == 5
 		    mov frameNum, 0
@@ -413,8 +439,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	    .endif
 	  .endif
 
-
-
+	  ;;;;;;;;;;;;;; One Player
 	  .if (eax == 3)
 	    .if frameNum == 5
 		    mov frameNum, 0
@@ -637,9 +662,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			   invoke TryStep, coordX, coordY, addr curMap, turn
 
 			  .if (ebx == 1)
-			    INVOKE SetTimer, hWnd, 3, 50, NULL
+			    
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+				INVOKE SetTimer, hWnd, 3, 50, NULL
 				.if EffectSwitch == 1
 					invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
 				.endif
@@ -651,7 +677,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				ret
 			  .endif
 
-			  invoke SetTimer, hWnd, 2, 1500, NULL
+			  invoke SetTimer, hWnd, 2, 1500, NULL ; AI is thingking
 			  ret
 		.elseif (choice_mode == 3)
 			loop4:
@@ -677,29 +703,18 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 			   invoke TryStep, coordX, coordY, addr curMap, turn
 
+
 			  .if (ebx == 1)
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+				INVOKE SetTimer, hWnd, 5, 100, NULL
+				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
+				invoke SendMessage, hWnd, WM_PAINT, 0, 0
+				
 				.if EffectSwitch == 1
 					invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
 				.endif
-				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
-				invoke SendMessage, hWnd, WM_PAINT, 0, 0
-			    invoke CheckEnd, addr curMap, addr black_count, addr white_count
-			    .if (eax == 1)
-					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
-					invoke SendMessage, hWnd, WM_PAINT, 0, 0
-					ret
-			    .endif
-				invoke CheckTurnEnd, addr curMap, turn
-				.if (eax == 1)
-					mov ebx, 3
-					sub ebx, turn
-					mov turn, ebx
-				.elseif (eax == 0)
-					;showMessage3
-					jmp loop4
-				.endif
+				
 			  .elseif (ebx == 0)
 				ret
 			  .endif
