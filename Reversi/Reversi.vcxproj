@@ -49,7 +49,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <MASM />
@@ -80,9 +80,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="backgroundfinal.bmp" />
-    <Image Include="Big.ico" />
     <Image Include="Black.bmp" />
     <Image Include="Empty.bmp" />
+    <Image Include="taiji.ico" />
     <Image Include="White.bmp" />
   </ItemGroup>
   <ItemGroup>
