@@ -231,7 +231,7 @@ InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD, c
 
 	mov ecx, 64
 	mov esi, 0
-	mov ebx, 3
+	mov ebx, 0
 	L2:
 		mov eax, pmap_pre
 		add eax, esi

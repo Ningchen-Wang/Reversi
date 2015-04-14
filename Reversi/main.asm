@@ -11,7 +11,6 @@ includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\gdi32.lib
 include logic.inc
 
-
 WinMain proto :DWORD,:DWORD,:DWORD,:DWORD
 DrawWindow proto
 
@@ -68,8 +67,6 @@ mouseEventLogLength DWORD 13
 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
-intX db 0
-intY db 0
 
 szStoryTitle     db	  '故事背景',0
 szStoryContent   db	  '    22世纪，同性恋逐渐变成了主流。',0dh,0ah,
@@ -79,6 +76,8 @@ szRuleTitle      db   '游戏规则',0
 szRuleContent    db	  '您不会下黑白棋吗？',0dh,0ah,'如有疑问，请拨打客服专线18201116235',0
 szContactTitle   db   '关于我们',0
 szContactContent db	  '如果您觉得该游戏不错，请汇款children19930928@yeah.net',0
+
+frameNum dd 0
 
 .data?
 hInstance HINSTANCE ?
@@ -234,23 +233,25 @@ getScoreDigit ENDP
 
 ; draw one piece of chess
 DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:HDC, hMemDC:HDC, rect:RECT, hWnd:HWND
+   LOCAL posX:DWORD
+   LOCAL posY:DWORD
 
    sub y, 7
    neg y
 
    mov eax, 48
    mul x
-   mov x, eax
+   mov posX, eax
   
    mov eax, 48
    mul y
-   mov y, eax
+   mov posY, eax
   
-   add x, 50
-   add  y, 50
+   add posX, 50
+   add posY, 50
 
-   inc x
-   inc y ;edge
+   inc posX
+   inc posY ;edge
 
    invoke GetClientRect,hWnd,addr rect
    ;invoke InvalidateRect, hWnd, NULL, 0
@@ -259,20 +260,56 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
    ;mov hdc,eax
    ;invoke CreateCompatibleDC,hdc
    ;mov hMemDC,eax
-   
 
    invoke SelectObject,hMemDC,hBitmap4
-   invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
-   .if color == 1
-	  invoke SelectObject,hMemDC,hBitmap2
-	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
-   .elseif color == 2
-      invoke SelectObject,hMemDC,hBitmap3
-	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+   invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
+
+   sub y, 7
+   neg y
+   invoke GetMapAddress, x, y, addr curMap
+   mov ebx, [eax]
+   invoke GetMapAddress, x, y, addr preMap
+   mov ecx, [eax]
+
+   .if ebx > 0
+       ;invoke SelectObject,hMemDC,hBitmap2
+   .endif
+   .if ebx == ecx
+	   .if color == 1
+		  invoke SelectObject,hMemDC,hBitmap2
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+	   .elseif color == 2
+		  invoke SelectObject,hMemDC,hBitmap3
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+	   .endif
+    .elseif turn == 2
+	   .if color == 1
+		  invoke SelectObject,hMemDC,hBitmap2
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+	   .elseif color == 2
+		  invoke SelectObject,hMemDC,hBitmap3
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+	   .endif
+    .elseif turn == 1
+       .if frameNum == 1
+		  invoke SelectObject,hMemDC,hBitmapWhite2
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+	   .elseif frameNum == 2
+		  invoke SelectObject,hMemDC,hBitmapWhite1
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+	   .elseif frameNum == 3
+		  invoke SelectObject,hMemDC,hBitmapBlack2
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+	   .elseif frameNum == 4
+		  invoke SelectObject,hMemDC,hBitmapBlack1
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+	   .elseif frameNum == 5
+		  invoke SelectObject,hMemDC,hBitmap2
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+	   .endif
    .endif
 
    ;invoke DeleteDC,hMemDC
-
    ret
 DrawOnePiece ENDP
 
@@ -321,9 +358,32 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
 	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
 
-
    .elseif uMsg == WM_TIMER
 	  mov eax, wParam
+
+	  .if (eax == 3)
+	    .if frameNum == 5
+		    mov frameNum, 0
+            invoke KillTimer, hWnd, 3
+
+			invoke CheckEnd, addr curMap, addr black_count, addr white_count
+			.if (eax == 1)
+				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+				invoke SendMessage, hWnd, WM_PAINT, 0, 0
+				ret
+			.endif
+			invoke CheckTurnEnd, addr curMap, 1
+			.if (eax == 1)
+				mov turn, 2
+				;show message: keep turn
+			.endif
+
+		.else
+			inc frameNum
+		    invoke SendMessage, hWnd, WM_PAINT, 0, 0
+	    .endif
+	  .endif
+
 	  .if (eax == 2)
 		invoke KillTimer, hWnd, 2
 	  loop3:
@@ -444,7 +504,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  ;invoke BitBlt,hMemDC,460 ,160,rect.right,rect.bottom,hImgDC,0,0,SRCAND
       ;invoke SelectObject,hImgDC,hBitmap3
 	  ;invoke BitBlt,hMemDC,460,270,rect.right,rect.bottom,hImgDC,0,0,SRCPAINT
-
 	  invoke SelectObject,hImgDC,hBitmapBlack1
 	  invoke BitBlt,hMemDC,460 ,160,rect.right,rect.bottom,hImgDC,0,0,SRCAND
 	  invoke SelectObject,hImgDC,hBitmapWhite1
@@ -484,6 +543,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke AppendLog, hLog, addr paintLog, paintLogLength
 
 	.elseif uMsg == WM_LBUTTONDOWN
+
+	    .if frameNum
+		   ret
+		.endif
 		invoke AppendLog, hLog, addr mouseEventLog, mouseEventLogLength
 		.if (choice_mode == 1 || choice_mode == 2)
 			.if (turn == 2)
@@ -515,29 +578,30 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			   invoke TryStep, coordX, coordY, addr curMap, turn
 
 			  .if (ebx == 1)
+			    INVOKE SetTimer, hWnd, 3, 100, NULL
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
 				invoke AppendLog, hLog, addr updateLog, updateLogLength
 				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
-			    invoke CheckEnd, addr curMap, addr black_count, addr white_count
-			    .if (eax == 1)
-					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
-					invoke SendMessage, hWnd, WM_PAINT, 0, 0
-					ret
-			    .endif
-				invoke CheckTurnEnd, addr curMap, 1
-				.if (eax == 1)
-					mov turn, 2
-				.elseif (eax == 0)
-					;showMessage1
-					jmp loop1
-				.endif
+			    ;invoke CheckEnd, addr curMap, addr black_count, addr white_count
+			    ;.if (eax == 1)
+				;	invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+				;	invoke SendMessage, hWnd, WM_PAINT, 0, 0
+				;	ret
+			    ;.endif
+				;invoke CheckTurnEnd, addr curMap, 1
+				;.if (eax == 1)
+				;	mov turn, 2
+				;.elseif (eax == 0)
+				;	;showMessage1
+				;	jmp loop1
+				;.endif
 			  .elseif (ebx == 0)
 				ret
 			  .endif
 
-			  invoke SetTimer, hWnd, 2, 500, NULL
+			  invoke SetTimer, hWnd, 2, 1500, NULL
 			  ret
 
 		  loop2:
