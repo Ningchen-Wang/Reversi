@@ -25,6 +25,9 @@ IDB_BITMAP5 equ 108 ;Number
 IDI_ICON equ 106
 
 IDR_MENU1 equ 105
+
+IDD_DIALOG1 equ 109
+
 ID_MODE1   equ 40001
 ID_MODE2   equ 40002
 ID_MODE3   equ 40003
@@ -86,7 +89,28 @@ start:
 	invoke DrawWindow
 	exit
 
-	
+_ProcDlgMain	proc	uses ebx edi esi hWnd,wMsg,wParam,lParam
+		mov	eax,wMsg
+		.if	eax == WM_CLOSE
+			invoke	EndDialog,hWnd,NULL
+		.elseif	eax == WM_INITDIALOG
+			invoke	LoadIcon,hInstance,IDI_ICON
+			invoke	SendMessage,hWnd,WM_SETICON,IDI_ICON,eax
+		.elseif	eax == WM_COMMAND
+			mov	eax,wParam
+			.if	ax == IDOK
+				invoke	EndDialog,hWnd,NULL
+			.else
+				invoke	EndDialog,hWnd,NULL
+			.endif
+		.else
+			mov	eax,FALSE
+			ret
+		.endif
+		mov	eax,TRUE
+		ret
+_ProcDlgMain	endp
+
 DrawWindow PROC
 
 	invoke GetModuleHandle, NULL
@@ -321,6 +345,16 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		  mov choice_mode, eax
 		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
 		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
+	  .elseif wParam == ID_MUSIC
+	  	  ;music
+	  .elseif wParam == ID_SOUND
+	      ;sound
+	  .elseif wParam == ID_STORY
+		  invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, NULL
+	  .elseif wParam == ID_RULE
+	      invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, NULL
+	  .elseif wParam == ID_CONTACT
+	      invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, NULL
 	  .endif
    .elseif uMsg==WM_PAINT
 
