@@ -450,11 +450,11 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 				ret
 			.endif
-			invoke CheckTurnEnd, addr curMap, 1
+			invoke CheckTurnEnd, addr curMap, 2
 			.if (eax == 1)
 				mov turn, 1
 			.else
-			    INVOKE SetTimer, hWnd, 4, 1000, NULL
+			    INVOKE SetTimer, hWnd, 2, 1000, NULL
 			.endif
 
 		.else
@@ -557,7 +557,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		  .endif
 	  .elseif wParam == ID_SOUND
 	      ;sound
-		  invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
 		  mov eax, 1
 		  sub eax, EffectSwitch
 		  mov EffectSwitch, eax	
