@@ -23,10 +23,8 @@ IDB_BITMAP4 equ 104 ;Empty
 IDB_BITMAP5 equ 108 ;Number
 
 IDI_ICON equ 106
-
-IDR_MENU1 equ 105
-
-IDD_DIALOG1 equ 109
+IDR_MENU equ 105
+IDD_DIALOG equ 109
 
 ID_MODE1   equ 40001
 ID_MODE2   equ 40002
@@ -104,7 +102,7 @@ _ProcDlgMain	proc	uses ebx edi esi hWnd,wMsg,wParam,lParam
 			.if	ax == IDOK
 				invoke	EndDialog,hWnd,NULL
 				invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
-		        invoke SendMessage, hWnd, WM_PAINT, 0, 0
+ 		        invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			.else
 				invoke	EndDialog,hWnd,NULL
 			.endif
@@ -152,7 +150,8 @@ WinMain proc hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 	invoke LoadCursor,NULL,IDC_ARROW
 	mov   wc.hCursor,eax
 	invoke RegisterClassEx, addr wc
-	invoke LoadMenu, hInstance, IDR_MENU1
+	invoke LoadMenu, hInstance, IDR_MENU
+
 	mov hMenu,eax
 	INVOKE CreateWindowEx,NULL,ADDR ClassName,ADDR AppName,\
            WS_OVERLAPPEDWINDOW  and  not WS_MAXIMIZEBOX and not WS_THICKFRAME,CW_USEDEFAULT,\ ;CW_USEDEFAULT,\
@@ -308,7 +307,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  loop3:
 		invoke CheckEnd, addr curMap, addr black_count, addr white_count
 		.if (eax == 1)
-			;showGameOver
+			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
 		.endif
 		invoke CopyMap, addr curMap, addr preMap
 		invoke AIStep, addr curMap, turn, addr black_count, addr white_count
@@ -321,7 +320,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		invoke SendMessage, hWnd, WM_PAINT, 0, 0
 		invoke CheckEnd, addr curMap, addr black_count, addr white_count
 		.if (eax == 1)
-			;showGameOver
+			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
 			ret
 		.endif
 		invoke CheckTurnEnd, addr curMap, 2
@@ -357,7 +356,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  	  ;music
 	  .elseif wParam == ID_SOUND
 	      ;sound	
-		  invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, MB_OK	  
+		  invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK	  
 	  .elseif wParam == ID_STORY
 		  invoke MessageBox,hWnd,offset szStoryContent, offset szStoryTitle, MB_OK
 	  .elseif wParam == ID_RULE
@@ -373,6 +372,9 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hdc,eax
       invoke CreateCompatibleDC,hdc
       mov hMemDC,eax
+
+	  ;invoke CreateCompatibleDC,hdc
+	  ;mov hImgDC,eax
 
 	  ;;;;Draw Background
       invoke SelectObject,hMemDC,hBitmap1
@@ -450,7 +452,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			 loop1:
 			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			   .if (eax == 1)
-					;showGameOver
+					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
 					ret
 			   .endif
 			   ;invoke GetCursorPos,addr pos
@@ -478,7 +480,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			    invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			    .if (eax == 1)
-					;showGameOver
+					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
 					ret
 			    .endif
 				invoke CheckTurnEnd, addr curMap, 1
@@ -498,7 +500,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		  loop2:
 			invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			.if (eax == 1)
-				;showGameOver
+				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
 				ret
 			.endif
 			invoke CopyMap, addr curMap, addr preMap
@@ -510,7 +512,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			.if (eax == 1)
-				;showGameOver
+				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
 				ret
 			.endif
 			invoke CheckTurnEnd, addr curMap, 2
@@ -524,7 +526,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			loop4:
 			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			   .if (eax == 1)
-					;showGameOver
+					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
 					ret
 			   .endif
 			   ;invoke GetCursorPos,addr pos
@@ -551,7 +553,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			    invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			    .if (eax == 1)
-					;showGameOver
+					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
 					ret
 			    .endif
 				invoke CheckTurnEnd, addr curMap, turn
