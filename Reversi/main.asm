@@ -395,6 +395,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
    .elseif uMsg == WM_TIMER
 	  mov eax, wParam
+	  push eax
 	  .if (eax == 4)
 	    .if frameNum == 5
 		    mov frameNum, 0
@@ -418,9 +419,9 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		    invoke SendMessage, hWnd, WM_PAINT, 0, 0
 	    .endif
 	  .endif
+	  pop eax
 
-
-
+	  push eax
 	  .if (eax == 3)
 	    .if frameNum == 5
 		    mov frameNum, 0
@@ -438,6 +439,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			invoke CheckTurnEnd, addr curMap, 1
 			.if (eax == 1)
 				mov turn, 2
+				invoke SetTimer, hWnd, 2, 500, NULL
 				;show message: keep turn
 			.endif
 
@@ -447,6 +449,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	    .endif
 	  .endif
 
+	  pop eax
+	  push eax
 	  .if (eax == 2)
 		invoke KillTimer, hWnd, 2
 	  loop3:
@@ -665,7 +669,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				ret
 			  .endif
 
-			  invoke SetTimer, hWnd, 2, 1500, NULL
+			  ;invoke SetTimer, hWnd, 2, 1500, NULL
 			  ret
 		.elseif (choice_mode == 3)
 			loop4:
