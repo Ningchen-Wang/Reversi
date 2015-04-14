@@ -6,9 +6,11 @@ include \masm32\include\windows.inc
 include \masm32\include\user32.inc
 include \masm32\include\kernel32.inc
 include \masm32\include\gdi32.inc
+include \masm32\include\winmm.inc
 includelib \masm32\lib\user32.lib
 includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\gdi32.lib
+includelib \masm32\lib\winmm.lib
 include logic.inc
 
 
@@ -65,6 +67,7 @@ updateLogLength DWORD 12
 paintLogLength DWORD 14
 aiLogLength DWORD 9
 mouseEventLogLength DWORD 13
+music BYTE "test", 0
 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
@@ -378,6 +381,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
 	  .elseif wParam == ID_MUSIC
 	  	  ;music
+		  invoke PlaySound, addr music, NULL, SND_FILENAME
 	  .elseif wParam == ID_SOUND
 	      ;sound	
 		  invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK	
