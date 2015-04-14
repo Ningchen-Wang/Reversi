@@ -10,14 +10,14 @@ include logic.inc
 .MODEL Flat,StdCall
 OPTION CaseMap:None
 .data
-weightMatrix DWORD 8, 1, 6, 5, 5, 6, 1, 8
+weightMatrix DWORD 9999, 1, 999, 15, 15, 999, 1, 9999
              DWORD 1, 1, 5, 4, 4, 5, 1, 1
-			 DWORD 6, 5, 3, 2, 2, 3, 5, 6
-			 DWORD 5, 4, 2, 1, 1, 2, 4, 5
-			 DWORD 5, 4, 2, 1, 1, 2, 4, 5
-			 DWORD 6, 5, 3, 2, 2, 3, 5, 6
+			 DWORD 999, 5, 99, 2, 2, 99, 5, 999
+			 DWORD 15, 4, 2, 1, 1, 2, 4, 15
+			 DWORD 15, 4, 2, 1, 1, 2, 4, 15
+			 DWORD 999, 5, 99, 2, 2, 99, 5, 999
 			 DWORD 1, 1, 5, 4, 4, 5, 1, 1
-			 DWORD 8, 1, 6, 5, 5, 6, 1, 8 
+			 DWORD 9999, 1, 999, 15, 15, 999, 1, 9999
 logFile BYTE "log.txt", 0
 turnSyntax BYTE "x = 0, y = 0, turn = 1", 0Dh, 0Ah, 0
 mapLineSyntax BYTE "00000000", 0Dh, 0Ah, 0
@@ -743,6 +743,8 @@ AppendMapLog PROC,
 	add ebx, 48
 	mov [eax], bl
 	INVOKE AppendLog, hLog, addr turnSyntax, 24 
+	popad
+	ret
 	mov ecx, 8
 	mov edx, pmap
 output_loop1:

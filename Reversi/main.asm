@@ -31,14 +31,6 @@ ID_MODE2 equ 40002
 ID_MODE3 equ 40003
 
 .data
-weightMatrix DWORD 9999, 1, 999, 15, 15, 999, 1, 9999
-             DWORD 1, 1, 5, 4, 4, 5, 1, 1
-			 DWORD 999, 5, 99, 2, 2, 99, 5, 999
-			 DWORD 15, 4, 2, 1, 1, 2, 4, 15
-			 DWORD 15, 4, 2, 1, 1, 2, 4, 15
-			 DWORD 999, 5, 99, 2, 2, 99, 5, 999
-			 DWORD 1, 1, 5, 4, 4, 5, 1, 1
-			 DWORD 9999, 1, 999, 15, 15, 999, 1, 9999
 ;last time map
 preMap DWORD 64 DUP(0)
 ;current time map
@@ -51,6 +43,14 @@ turn DWORD 2
 ;choice_mode 3:man vs man
 choice_mode DWORD 1
 hLog DWORD ?
+updateLog BYTE "Update map", 0Dh, 0Ah, 0
+paintLog BYTE "Paint dialog", 0Dh, 0Ah, 0
+aiLog BYTE "AI Step", 0Dh, 0Ah, 0
+mouseEventLog BYTE "LButtonDown", 0Dh, 0Ah, 0
+updateLogLength DWORD 12
+paintLogLength DWORD 14
+aiLogLength DWORD 9
+mouseEventLogLength DWORD 13
 
 ClassName db "SimpleWin32ASMBitmapClass",0
 AppName  db "男女男 女男女 木其",0
@@ -247,9 +247,11 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		.endif
 		invoke CopyMap, addr curMap, addr preMap
 		invoke AIStep, addr curMap, turn, addr black_count, addr white_count
+		invoke AppendLog, hLog, addr aiLog, aiLogLength
 		mov coordX, eax
 		mov coordY, edx
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+		invoke AppendLog, hLog, addr updateLog, updateLogLength
 		invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 		invoke SendMessage, hWnd, WM_PAINT, 0, 0
 		invoke CheckEnd, addr curMap, addr black_count, addr white_count
@@ -269,7 +271,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		ret
 	  .endif
 
-      invoke SendMessage, hWnd, WM_PAINT, 0, 0
+      ;invoke SendMessage, hWnd, WM_PAINT, 0, 0
    .elseif uMsg==WM_COMMAND
       .if wParam == ID_MODE1
 	      mov eax, 1
@@ -332,8 +334,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  L2:
 
       invoke DeleteDC,hMemDC
+	  invoke AppendLog, hLog, addr paintLog, paintLogLength
 
 	.elseif uMsg == WM_LBUTTONDOWN
+		invoke AppendLog, hLog, addr mouseEventLog, mouseEventLogLength
 		.if (choice_mode == 1 || choice_mode == 2)
 			.if (turn == 2)
 				ret
@@ -365,6 +369,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			  .if (ebx == 1)
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
+				invoke AppendLog, hLog, addr updateLog, updateLogLength
 				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			    invoke CheckEnd, addr curMap, addr black_count, addr white_count
