@@ -68,6 +68,13 @@ AppName  db "男女男 女男女 木其",0
 intX db 0
 intY db 0
 
+szStoryTitle     db	  '故事背景',0
+szStoryContent   db	  '22世纪，同性恋逐渐变成了主流。',0
+szRuleTitle      db   '游戏规则',0
+szRuleContent    db	  '您会下黑白棋吗？如有疑问，请拨打客服专线18201116235',0
+szContactTitle   db   '关于我们',0
+szContactContent db	  '如果您觉得不错，请汇款children19930928@yeah.net',0
+
 .data?
 hInstance HINSTANCE ?
 hMenu dd ?
@@ -150,8 +157,8 @@ WinMain proc hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 	invoke LoadMenu, hInstance, IDR_MENU1
 	mov hMenu,eax
 	INVOKE CreateWindowEx,NULL,ADDR ClassName,ADDR AppName,\
-           WS_OVERLAPPEDWINDOW  and  not WS_MAXIMIZEBOX and not WS_THICKFRAME,50,\ ;CW_USEDEFAULT,\
-           50,700,540,NULL,hMenu,\
+           WS_OVERLAPPEDWINDOW  and  not WS_MAXIMIZEBOX and not WS_THICKFRAME,CW_USEDEFAULT,\ ;CW_USEDEFAULT,\
+           CW_USEDEFAULT,700,540,NULL,hMenu,\
            hInst,NULL
 
 	mov   hwnd,eax
@@ -270,6 +277,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
    LOCAL coordX:DWORD
    LOCAL coordY:DWORD
 
+
+
    mov coordX, 0
    mov coordY, 0
 
@@ -348,13 +357,14 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  .elseif wParam == ID_MUSIC
 	  	  ;music
 	  .elseif wParam == ID_SOUND
-	      ;sound
+	      ;sound	
+		  ;invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, MB_OK	  
 	  .elseif wParam == ID_STORY
-		  invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, NULL
+		  invoke MessageBox,hWnd,offset szStoryContent, offset szStoryTitle, MB_OK
 	  .elseif wParam == ID_RULE
-	      invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, NULL
+	      invoke MessageBox,hWnd, offset szRuleContent,offset szRuleTitle, NULL
 	  .elseif wParam == ID_CONTACT
-	      invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, NULL
+	      invoke MessageBox,hWnd, offset szContactContent, offset szContactTitle, NULL
 	  .endif
    .elseif uMsg==WM_PAINT
 
