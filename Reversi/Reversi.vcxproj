@@ -83,12 +83,14 @@
     <Image Include="Black.bmp" />
     <Image Include="Black1.bmp" />
     <Image Include="Black2.bmp" />
+    <Image Include="Black3.bmp" />
     <Image Include="Empty.bmp" />
     <Image Include="number.bmp" />
     <Image Include="taiji.ico" />
     <Image Include="White.bmp" />
     <Image Include="White1.bmp" />
     <Image Include="White2.bmp" />
+    <Image Include="White3.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="logic.inc" />

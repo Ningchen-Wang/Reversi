@@ -27,6 +27,8 @@ IDB_BLACK1  equ  110
 IDB_BLACK2  equ  111
 IDB_WHITE1  equ  112
 IDB_WHITE2  equ  113
+IDB_BLACK3  equ  114
+IDB_WHITE3  equ  115
 
 IDI_ICON    equ 106
 IDR_MENU    equ 105
@@ -94,16 +96,18 @@ hInstance HINSTANCE ?
 hMenu dd ?
 CommandLine LPSTR ?
 hBitmap1 dd ?
-hBitmap2 dd ?
-hBitmap3 dd ?
+hBitmapBlack0 dd ?
+hBitmapWhite0 dd ?
 hBitmap4 dd ?
 hBitmap5 dd ?
 hIcon    dd ?
 
 hBitmapBlack1 dd ?
 hBitmapBlack2 dd ?
+hBitmapBlack3 dd ?
 hBitmapWhite1 dd ?
 hBitmapWhite2 dd ?
+hBitmapWhite3 dd ?
 
 ;--------------------------------------------------------------------------
 .code
@@ -303,48 +307,60 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
    mov ecx, [eax]
 
    .if ebx > 0
-       ;invoke SelectObject,hMemDC,hBitmap2
+       ;invoke SelectObject,hMemDC,hBitmapBlack0
    .endif
    .if ebx == ecx || ecx == 0
 	   .if color == 1
-		  invoke SelectObject,hMemDC,hBitmap2
+		  invoke SelectObject,hMemDC,hBitmapBlack0
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
 	   .elseif color == 2
-		  invoke SelectObject,hMemDC,hBitmap3
+		  invoke SelectObject,hMemDC,hBitmapWhite0
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
 	   .endif
-    .elseif turn == 2
+    .elseif turn == 2	;b0 b3 b2 b1 w3 w2 w1 w0;b0 b1 b2 b3 w1 w2 w3 w0
        .if frameNum == 1
+		  invoke SelectObject,hMemDC,hBitmapBlack3
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+	   .elseif frameNum == 2
 		  invoke SelectObject,hMemDC,hBitmapBlack2
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
 	   .elseif frameNum == 2
 		  invoke SelectObject,hMemDC,hBitmapBlack1
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
 	   .elseif frameNum == 3
-		  invoke SelectObject,hMemDC,hBitmapWhite2
+		  invoke SelectObject,hMemDC,hBitmapWhite3
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
 	   .elseif frameNum == 4
+		  invoke SelectObject,hMemDC,hBitmapWhite2
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+	   .elseif frameNum == 5
 		  invoke SelectObject,hMemDC,hBitmapWhite1
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
-	   .else;if frameNum == 5
-		  invoke SelectObject,hMemDC,hBitmap3
+	   .else;if frameNum == 6
+		  invoke SelectObject,hMemDC,hBitmapWhite0
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
 	   .endif
-    .elseif turn == 1
+    .elseif turn == 1 ;w0 w3 w2 w1 b3 b2 b1 b0
        .if frameNum == 1
-		  invoke SelectObject,hMemDC,hBitmapWhite2
+		  invoke SelectObject,hMemDC,hBitmapWhite3
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
 	   .elseif frameNum == 2
-		  invoke SelectObject,hMemDC,hBitmapWhite1
+		  invoke SelectObject,hMemDC,hBitmapWhite2
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
 	   .elseif frameNum == 3
+		  invoke SelectObject,hMemDC,hBitmapWhite1
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+	   .elseif frameNum == 4
+		  invoke SelectObject,hMemDC,hBitmapBlack3
+		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+	   .elseif frameNum == 5
 		  invoke SelectObject,hMemDC,hBitmapBlack2
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
-	   .elseif frameNum == 4
+	   .elseif frameNum == 6
 		  invoke SelectObject,hMemDC,hBitmapBlack1
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
-	   .else;if frameNum == 5
-		  invoke SelectObject,hMemDC,hBitmap2
+	   .else;if frameNum == 7
+		  invoke SelectObject,hMemDC,hBitmapBlack0
 		  invoke BitBlt,hdc,posX,posY,rect.right,rect.bottom,hMemDC,0,0,SRCAND
 	   .endif
    .endif
@@ -379,9 +395,9 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke LoadBitmap,hInstance,IDB_BITMAP1
       mov hBitmap1,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP2
-      mov hBitmap2,eax
+      mov hBitmapBlack0,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP3
-      mov hBitmap3,eax
+      mov hBitmapWhite0,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP4
       mov hBitmap4,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP5
@@ -390,10 +406,14 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hBitmapBlack1,eax
 	  invoke LoadBitmap,hInstance,IDB_BLACK1
       mov hBitmapBlack2,eax
+	  invoke LoadBitmap,hInstance,IDB_BLACK3
+      mov hBitmapBlack3,eax
 	  invoke LoadBitmap,hInstance,IDB_WHITE1
       mov hBitmapWhite1,eax
 	  invoke LoadBitmap,hInstance,IDB_WHITE2
       mov hBitmapWhite2,eax
+	  invoke LoadBitmap,hInstance,IDB_WHITE3
+      mov hBitmapWhite3,eax
 
 	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
 
@@ -415,7 +435,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 	  ;;;;;;;;;;;;; Two Players
 	  .if (eax == 5)
-	      .if frameNum == 5
+	      .if frameNum == 7
 		      mov frameNum, 0
 			  invoke KillTimer, hWnd, 5
 
@@ -442,7 +462,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  push eax
 
 	  .if (eax == 4)
-	    .if frameNum == 5
+	    .if frameNum == 7
 		    mov frameNum, 0
             invoke KillTimer, hWnd, 4
 
@@ -470,7 +490,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 	  push eax
 	  .if (eax == 3)
-	    .if frameNum == 5
+	    .if frameNum == 7
 		    mov frameNum, 0
             invoke KillTimer, hWnd, 3
 
@@ -516,7 +536,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		mov coordY, edx
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
 
-		INVOKE SetTimer, hWnd, 4, 50, NULL
+		INVOKE SetTimer, hWnd, 4, 30, NULL
 
 		.if EffectSwitch == 1
 			;invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
@@ -627,13 +647,13 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  ;Draw Score
 	  ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-	  ;invoke SelectObject,hImgDC,hBitmap2
+	  ;invoke SelectObject,hImgDC,hBitmapBlack0
 	  ;invoke BitBlt,hMemDC,460 ,160,rect.right,rect.bottom,hImgDC,0,0,SRCAND
-      ;invoke SelectObject,hImgDC,hBitmap3
+      ;invoke SelectObject,hImgDC,hBitmapWhite0
 	  ;invoke BitBlt,hMemDC,460,270,rect.right,rect.bottom,hImgDC,0,0,SRCPAINT
 	  invoke SelectObject,hImgDC,hBitmapBlack1
 	  invoke BitBlt,hMemDC,460 ,160,rect.right,rect.bottom,hImgDC,0,0,SRCAND
-	  invoke SelectObject,hImgDC,hBitmapWhite1
+	  invoke SelectObject,hImgDC,hBitmapWhite3
 	  invoke BitBlt,hMemDC,460,270,rect.right,rect.bottom,hImgDC,0,0,SRCPAINT
 	  
 	  invoke getScoreDigit
@@ -711,7 +731,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			    
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
-				INVOKE SetTimer, hWnd, 3, 50, NULL
+				INVOKE SetTimer, hWnd, 3, 30, NULL
 				.if EffectSwitch == 1
 					;invoke PlaySound, addr music1, NULL, SND_FILENAME or SND_ASYNC
 					.if turn == 1
@@ -760,7 +780,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			  .if (ebx == 1)
 				invoke CopyMap, addr curMap, addr preMap
 				invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
-				INVOKE SetTimer, hWnd, 5, 100, NULL
+				INVOKE SetTimer, hWnd, 5, 30, NULL
 				invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 
@@ -783,9 +803,9 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  invoke CloseHandle, hLog
       invoke DeleteObject,hBitmap1
 		invoke PostQuitMessage,NULL
-	  invoke DeleteObject,hBitmap2
+	  invoke DeleteObject,hBitmapBlack0
 		invoke PostQuitMessage,NULL
-	  invoke DeleteObject,hBitmap3
+	  invoke DeleteObject,hBitmapWhite0
 		invoke PostQuitMessage,NULL
 	.ELSE
 		invoke DefWindowProc,hWnd,uMsg,wParam,lParam		
