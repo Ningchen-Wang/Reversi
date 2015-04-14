@@ -115,7 +115,13 @@ _ProcDlgMain	proc	uses ebx edi esi hWnd,wMsg,wParam,lParam
 			invoke	EndDialog,hWnd,NULL
 		.elseif	eax == WM_INITDIALOG
 			invoke	LoadIcon,hInstance,IDI_ICON
+			mov ebx, lParam
+			mov ecx, 0
+			mov cx, bx
+			shr ebx, 16
 			invoke	SendMessage,hWnd,WM_SETICON,IDI_ICON,eax
+		.elseif eax == WM_PAINT
+			
 		.elseif	eax == WM_COMMAND
 			mov	eax,wParam
 			.if	ax == IDOK
@@ -389,7 +395,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
 			invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			.if (eax == 1)
-				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+				mov eax, black_count
+				shl eax, 16
+				or eax, white_count
+				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 				ret
 			.endif
@@ -410,7 +419,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  loop3:
 		invoke CheckEnd, addr curMap, addr black_count, addr white_count
 		.if (eax == 1)
-			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+			mov eax, black_count
+			shl eax, 16
+			or eax, white_count
+			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
 			invoke SendMessage, hWnd, WM_PAINT, 0, 0
 		.endif
 		invoke CopyMap, addr curMap, addr preMap
@@ -427,7 +439,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		invoke SendMessage, hWnd, WM_PAINT, 0, 0
 		invoke CheckEnd, addr curMap, addr black_count, addr white_count
 		.if (eax == 1)
-			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+			mov eax, black_count
+			shl eax, 16
+			or eax, white_count
+			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
 			invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			ret
 		.endif
@@ -590,7 +605,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			 loop1:
 			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			   .if (eax == 1)
-					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+					mov eax, black_count
+					shl eax, 16
+					or eax, white_count
+					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
 					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			   .endif
@@ -675,7 +693,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			loop4:
 			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			   .if (eax == 1)
-					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+			   		mov eax, black_count
+					shl eax, 16
+					or eax, white_count
+					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
 					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			   .endif
@@ -706,7 +727,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			    invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			    .if (eax == 1)
-					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+					mov eax, black_count
+					shl eax, 16
+					or eax, white_count
+					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, eax
 					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			    .endif
