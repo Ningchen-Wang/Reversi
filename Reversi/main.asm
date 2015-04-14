@@ -252,6 +252,11 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		invoke UpdateMap, coordX, coordY, addr curMap, turn, addr black_count, addr white_count
 		invoke AppendMapLog, hLog, addr curMap, coordX, coordY, turn
 		invoke SendMessage, hWnd, WM_PAINT, 0, 0
+		invoke CheckEnd, addr curMap, addr black_count, addr white_count
+		.if (eax == 1)
+			;showGameOver
+			ret
+		.endif
 		invoke CheckTurnEnd, addr curMap, 2
 		.if (eax == 1)
 			mov turn, 1
