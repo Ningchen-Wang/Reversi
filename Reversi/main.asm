@@ -300,7 +300,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hBitmap5,eax
 
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
-	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
+	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
+
 
    .elseif uMsg == WM_TIMER
 	  mov eax, wParam
@@ -342,17 +343,17 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       .if wParam == ID_MODE1
 	      mov eax, 1
 		  mov choice_mode, eax
-		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
+		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
 		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
 	  .elseif wParam == ID_MODE2
 	      mov eax, 2
 		  mov choice_mode, eax
-		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
+		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
 		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
 	  .elseif wParam == ID_MODE3
 	  	  mov eax, 3
 		  mov choice_mode, eax
-		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
+		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
 		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
 	  .elseif wParam == ID_MUSIC
 	  	  ;music

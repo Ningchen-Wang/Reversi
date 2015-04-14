@@ -200,7 +200,7 @@ direction_loop_y:
 TryStep ENDP
 
 ;----------------------------------------------------
-InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD, choice_mode:DWORD
+InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD, choice_mode:DWORD, pmap_pre: DWORD
 ;initilize the var in main
 	local x:DWORD
 	local y:DWORD
@@ -228,6 +228,16 @@ InitMap PROC, pturn:DWORD, pmap:DWORD, pblack_count:DWORD, pwhite_count:DWORD, c
 		mov [eax], ebx
 		add esi, 4
 		loop L1
+
+	mov ecx, 64
+	mov esi, 0
+	mov ebx, 3
+	L2:
+		mov eax, pmap_pre
+		add eax, esi
+		mov [eax], ebx
+		add esi, 4
+		loop L2
 
 	mov eax, pmap
 	mov esi, 108
@@ -655,13 +665,14 @@ AIStep ENDP
 logicTest PROC
 	local turn:DWORD 
 	local map[64]:DWORD
+	local preMap[64]:DWORD
 	local black_count:DWORD
 	local white_count:DWORD
 	local map_copy[64]:DWORD
 	local AI_x:DWORD
 	local AI_y:DWORD
 
-	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count, 0
+	INVOKE InitMap, addr turn, addr map, addr black_count, addr white_count, 0, addr preMap
 
 	main_logic_loop:
 	black_input:
