@@ -86,10 +86,6 @@ hBitmap4 dd ?
 hBitmap5 dd ?
 hIcon    dd ?
 
-gridLen dd 50		;the length of grid
-gridOffsetX dd 50	;offset x to window
-gridOffsetY dd 50	;offset y to window
-
 ;--------------------------------------------------------------------------
 .code
 start:
@@ -107,6 +103,8 @@ _ProcDlgMain	proc	uses ebx edi esi hWnd,wMsg,wParam,lParam
 			mov	eax,wParam
 			.if	ax == IDOK
 				invoke	EndDialog,hWnd,NULL
+				invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
+		        invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			.else
 				invoke	EndDialog,hWnd,NULL
 			.endif
@@ -359,7 +357,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  	  ;music
 	  .elseif wParam == ID_SOUND
 	      ;sound	
-		  ;invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, MB_OK	  
+		  invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, MB_OK	  
 	  .elseif wParam == ID_STORY
 		  invoke MessageBox,hWnd,offset szStoryContent, offset szStoryTitle, MB_OK
 	  .elseif wParam == ID_RULE
