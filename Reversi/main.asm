@@ -26,9 +26,14 @@ IDB_BITMAP3 equ 103 ;White
 IDB_BITMAP4 equ 104 ;Empty
 
 IDR_MENU1 equ 105
-ID_MODE1 equ 40001
-ID_MODE2 equ 40002
-ID_MODE3 equ 40003
+ID_MODE1   equ 40001
+ID_MODE2   equ 40002
+ID_MODE3   equ 40003
+ID_SOUND   equ 40004
+ID_MUSIC   equ 40005
+ID_STORY   equ 40006
+ID_RULE    equ 40007
+ID_CONTACT equ 40008
 
 .data
 ;last time map
@@ -121,7 +126,7 @@ WinMain proc hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 	mov hMenu,eax
 	INVOKE CreateWindowEx,NULL,ADDR ClassName,ADDR AppName,\
            WS_OVERLAPPEDWINDOW  and  not WS_MAXIMIZEBOX and not WS_THICKFRAME,50,\ ;CW_USEDEFAULT,\
-           50,670,489,NULL,hMenu,\
+           50,700,540,NULL,hMenu,\
            hInst,NULL
 
 	mov   hwnd,eax
