@@ -1,8 +1,4 @@
 ;Reversi_main
-;Author: wangningchen, wangchengpeng
-;Create: 2015/3/18
-;Last modify: 2015/3/18
-;Main logic entry
 
 ;--------------------------------------------------------------------------
 include \masm32\include\masm32rt.inc
@@ -24,10 +20,14 @@ IDB_BITMAP1 equ 101	;background
 IDB_BITMAP2 equ 102 ;Black
 IDB_BITMAP3 equ 103 ;White
 IDB_BITMAP4 equ 104 ;Empty
+IDB_BITMAP5 equ 108 ;Number
 
 IDI_ICON equ 106
 
 IDR_MENU1 equ 105
+
+IDD_DIALOG1 equ 109
+
 ID_MODE1   equ 40001
 ID_MODE2   equ 40002
 ID_MODE3   equ 40003
@@ -76,6 +76,7 @@ hBitmap1 dd ?
 hBitmap2 dd ?
 hBitmap3 dd ?
 hBitmap4 dd ?
+hBitmap5 dd ?
 hIcon    dd ?
 
 gridLen dd 50		;the length of grid
@@ -88,7 +89,28 @@ start:
 	invoke DrawWindow
 	exit
 
-	
+_ProcDlgMain	proc	uses ebx edi esi hWnd,wMsg,wParam,lParam
+		mov	eax,wMsg
+		.if	eax == WM_CLOSE
+			invoke	EndDialog,hWnd,NULL
+		.elseif	eax == WM_INITDIALOG
+			invoke	LoadIcon,hInstance,IDI_ICON
+			invoke	SendMessage,hWnd,WM_SETICON,IDI_ICON,eax
+		.elseif	eax == WM_COMMAND
+			mov	eax,wParam
+			.if	ax == IDOK
+				invoke	EndDialog,hWnd,NULL
+			.else
+				invoke	EndDialog,hWnd,NULL
+			.endif
+		.else
+			mov	eax,FALSE
+			ret
+		.endif
+		mov	eax,TRUE
+		ret
+_ProcDlgMain	endp
+
 DrawWindow PROC
 
 	invoke GetModuleHandle, NULL
@@ -119,7 +141,7 @@ WinMain proc hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 	mov   wc.hbrBackground,COLOR_WINDOW+1
 	mov   wc.lpszMenuName,NULL
 	mov   wc.lpszClassName,OFFSET ClassName
-	invoke LoadIcon,NULL,IDI_APPLICATION
+	invoke LoadIcon,hInstance,IDI_ICON
 	mov   wc.hIcon,eax
 	mov   wc.hIconSm,eax
 	invoke LoadCursor,NULL,IDC_ARROW
@@ -191,6 +213,7 @@ getScoreDigit PROC
 	div bx
 	mov wcountDigit1, ax
 	mov wcountDigit2, dx
+	ret
 getScoreDigit ENDP
 
 ; draw one piece of chess
@@ -214,16 +237,16 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
    inc y ;edge
 
    invoke GetClientRect,hWnd,addr rect
-   invoke InvalidateRect, hWnd, addr rect, 0
+   invoke InvalidateRect, hWnd, NULL, 0
 
    invoke BeginPaint,hWnd,addr ps
    mov hdc,eax
    invoke CreateCompatibleDC,hdc
    mov hMemDC,eax
    
+
    invoke SelectObject,hMemDC,hBitmap4
    invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
-
    .if color == 1
 	  invoke SelectObject,hMemDC,hBitmap2
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
@@ -264,6 +287,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hBitmap3,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP4
       mov hBitmap4,eax
+	  invoke LoadBitmap,hInstance,IDB_BITMAP5
+      mov hBitmap5,eax
 
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
 	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
@@ -320,36 +345,41 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		  mov choice_mode, eax
 		  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode
 		  invoke SendMessage, hWnd, WM_PAINT, 0, 0
+	  .elseif wParam == ID_MUSIC
+	  	  ;music
+	  .elseif wParam == ID_SOUND
+	      ;sound
+	  .elseif wParam == ID_STORY
+		  invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, NULL
+	  .elseif wParam == ID_RULE
+	      invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, NULL
+	  .elseif wParam == ID_CONTACT
+	      invoke DialogBoxParam, hInstance, IDD_DIALOG1, hWnd, _ProcDlgMain, NULL
 	  .endif
    .elseif uMsg==WM_PAINT
+
+   	  invoke GetClientRect,hWnd,addr rect
+      invoke InvalidateRect, hWnd, NULL, 0
       invoke BeginPaint,hWnd,addr ps
       mov hdc,eax
       invoke CreateCompatibleDC,hdc
       mov hMemDC,eax
+
+	  ;;;;Draw Background
       invoke SelectObject,hMemDC,hBitmap1
       invoke GetClientRect,hWnd,addr rect
       invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
 	  
+	  ;;;; Draw Chess
 	  L1:
 	  	.if coordY > 7
 			jmp L2
 		.endif
-
-		;.if ((black_count == 2 && white_count == 2) || (black_count == 1 && white_count == 4))
-		;	invoke DrawOnePiece, 0, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		;.endif
 	  
 		invoke GetMapAddress, coordX, coordY, addr curMap
 		mov ebx, [eax]
 		invoke GetMapAddress, coordX, coordY, addr preMap
 		mov ecx, [eax]
-
-		;.if ebx == 1
-		;	invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		;.elseif ebx == 2
-		;	invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
-		;.elseif ebx == 0
-		;    invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 
 		invoke DrawOnePiece, ebx, coordX, coordY, ps, hdc, hMemDC, rect, hWnd
 
@@ -364,6 +394,39 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		.endif
 		jmp L1
 	  L2:
+
+	  ;;;;;;;;;;;;;;;;;;;;;;;;;;
+	  ;Draw Score
+	  ;;;;;;;;;;;;;;;;;;;;;;;;;;
+	  invoke SelectObject,hMemDC,hBitmap2
+	  invoke BitBlt,hdc,460 ,160,rect.right,rect.bottom,hMemDC,0,0,SRCAND
+
+      invoke SelectObject,hMemDC,hBitmap3
+	  invoke BitBlt,hdc,460,270,rect.right,rect.bottom,hMemDC,0,0,SRCPAINT
+	  
+	  invoke getScoreDigit
+
+	  invoke SelectObject,hMemDC,hBitmap5
+
+	  mov ax, bcountDigit1
+	  mov bx, 60
+	  mul bx
+	  invoke BitBlt,hdc,520,150,60,70,hMemDC,ax,0,SRCAND
+	 
+	  mov ax, wcountDigit1
+	  mov bx, 60
+	  mul bx
+	  invoke BitBlt,hdc,520,150+100,60,70,hMemDC,ax,100,SRCPAINT
+
+	  mov ax, bcountDigit2
+	  mov bx, 60
+	  mul bx
+	  invoke BitBlt,hdc,520+45,150,60,70,hMemDC,ax,0,SRCAND
+
+	  mov ax, wcountDigit2
+	  mov bx, 60
+	  mul bx
+	  invoke BitBlt,hdc,520+45,150+100,60,70,hMemDC,ax,100,SRCPAINT
 
       invoke DeleteDC,hMemDC
 	  invoke AppendLog, hLog, addr paintLog, paintLogLength
