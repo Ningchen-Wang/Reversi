@@ -67,11 +67,13 @@ intX db 0
 intY db 0
 
 szStoryTitle     db	  '故事背景',0
-szStoryContent   db	  '22世纪，同性恋逐渐变成了主流。',0
+szStoryContent   db	  '    22世纪，同性恋逐渐变成了主流。',0dh,0ah,
+'    然而，只要存在可一一配对的男女必须强制结婚，某一性别人数过剩才允许该性别同性结婚。',0dh,0ah,
+'    随着医学突飞猛进，变性手术日臻成熟，因此人类社会被分为男女两方阵营，互相想要把对方阵营拉拢到自己阵营，使得本阵营性别过剩。',0
 szRuleTitle      db   '游戏规则',0
-szRuleContent    db	  '您会下黑白棋吗？如有疑问，请拨打客服专线18201116235',0
+szRuleContent    db	  '您不会下黑白棋吗？',0dh,0ah,'如有疑问，请拨打客服专线18201116235',0
 szContactTitle   db   '关于我们',0
-szContactContent db	  '如果您觉得不错，请汇款children19930928@yeah.net',0
+szContactContent db	  '如果您觉得该游戏不错，请汇款children19930928@yeah.net',0
 
 .data?
 hInstance HINSTANCE ?
@@ -102,7 +104,7 @@ _ProcDlgMain	proc	uses ebx edi esi hWnd,wMsg,wParam,lParam
 			.if	ax == IDOK
 				invoke	EndDialog,hWnd,NULL
 				invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
- 		        invoke SendMessage, hWnd, WM_PAINT, 0, 0
+ 		        ;invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			.else
 				invoke	EndDialog,hWnd,NULL
 			.endif
@@ -308,6 +310,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		invoke CheckEnd, addr curMap, addr black_count, addr white_count
 		.if (eax == 1)
 			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+			invoke SendMessage, hWnd, WM_PAINT, 0, 0
 		.endif
 		invoke CopyMap, addr curMap, addr preMap
 		invoke AIStep, addr curMap, turn, addr black_count, addr white_count
@@ -321,6 +324,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		invoke CheckEnd, addr curMap, addr black_count, addr white_count
 		.if (eax == 1)
 			invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+			invoke SendMessage, hWnd, WM_PAINT, 0, 0
 			ret
 		.endif
 		invoke CheckTurnEnd, addr curMap, 2
@@ -356,7 +360,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  	  ;music
 	  .elseif wParam == ID_SOUND
 	      ;sound	
-		  invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK	  
+		  invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK	
+		  invoke SendMessage, hWnd, WM_PAINT, 0, 0  
 	  .elseif wParam == ID_STORY
 		  invoke MessageBox,hWnd,offset szStoryContent, offset szStoryTitle, MB_OK
 	  .elseif wParam == ID_RULE
@@ -454,6 +459,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			   .if (eax == 1)
 					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			   .endif
 			   ;invoke GetCursorPos,addr pos
@@ -482,6 +488,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			    invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			    .if (eax == 1)
 					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			    .endif
 				invoke CheckTurnEnd, addr curMap, 1
@@ -502,6 +509,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			.if (eax == 1)
 				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 				ret
 			.endif
 			invoke CopyMap, addr curMap, addr preMap
@@ -514,6 +522,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			.if (eax == 1)
 				invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+				invoke SendMessage, hWnd, WM_PAINT, 0, 0
 				ret
 			.endif
 			invoke CheckTurnEnd, addr curMap, 2
@@ -528,6 +537,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			   invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			   .if (eax == 1)
 					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			   .endif
 			   ;invoke GetCursorPos,addr pos
@@ -555,6 +565,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 			    invoke CheckEnd, addr curMap, addr black_count, addr white_count
 			    .if (eax == 1)
 					invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
+					invoke SendMessage, hWnd, WM_PAINT, 0, 0
 					ret
 			    .endif
 				invoke CheckTurnEnd, addr curMap, turn
