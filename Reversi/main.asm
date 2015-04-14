@@ -22,6 +22,11 @@ IDB_BITMAP3 equ 103 ;White
 IDB_BITMAP4 equ 104 ;Empty
 IDB_BITMAP5 equ 108 ;Number
 
+IDB_BLACK1  equ  110
+IDB_BLACK2  equ  111
+IDB_WHITE1  equ  112
+IDB_WHITE2  equ  113
+
 IDI_ICON equ 106
 IDR_MENU equ 105
 IDD_DIALOG equ 109
@@ -85,6 +90,11 @@ hBitmap3 dd ?
 hBitmap4 dd ?
 hBitmap5 dd ?
 hIcon    dd ?
+
+hBitmapBlack1 dd ?
+hBitmapBlack2 dd ?
+hBitmapWhite1 dd ?
+hBitmapWhite2 dd ?
 
 ;--------------------------------------------------------------------------
 .code
@@ -299,6 +309,14 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       mov hBitmap4,eax
 	  invoke LoadBitmap,hInstance,IDB_BITMAP5
       mov hBitmap5,eax
+	  invoke LoadBitmap,hInstance,IDB_BLACK1
+      mov hBitmapBlack1,eax
+	  invoke LoadBitmap,hInstance,IDB_BLACK1
+      mov hBitmapBlack2,eax
+	  invoke LoadBitmap,hInstance,IDB_WHITE1
+      mov hBitmapWhite1,eax
+	  invoke LoadBitmap,hInstance,IDB_WHITE2
+      mov hBitmapWhite2,eax
 
 	  ;INVOKE SetTimer, hWnd, 1, 200, NULL
 	  invoke InitMap, addr turn, addr curMap, addr black_count, addr white_count, choice_mode, addr preMap
@@ -421,10 +439,15 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  ;;;;;;;;;;;;;;;;;;;;;;;;;;
 	  ;Draw Score
 	  ;;;;;;;;;;;;;;;;;;;;;;;;;;
-	  invoke SelectObject,hImgDC,hBitmap2
-	  invoke BitBlt,hMemDC,460 ,160,rect.right,rect.bottom,hImgDC,0,0,SRCAND
 
-      invoke SelectObject,hImgDC,hBitmap3
+	  ;invoke SelectObject,hImgDC,hBitmap2
+	  ;invoke BitBlt,hMemDC,460 ,160,rect.right,rect.bottom,hImgDC,0,0,SRCAND
+      ;invoke SelectObject,hImgDC,hBitmap3
+	  ;invoke BitBlt,hMemDC,460,270,rect.right,rect.bottom,hImgDC,0,0,SRCPAINT
+
+	  invoke SelectObject,hImgDC,hBitmapBlack1
+	  invoke BitBlt,hMemDC,460 ,160,rect.right,rect.bottom,hImgDC,0,0,SRCAND
+	  invoke SelectObject,hImgDC,hBitmapWhite1
 	  invoke BitBlt,hMemDC,460,270,rect.right,rect.bottom,hImgDC,0,0,SRCPAINT
 	  
 	  invoke getScoreDigit
