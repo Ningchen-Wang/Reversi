@@ -110,6 +110,11 @@ start:
 	exit
 
 _ProcDlgMain	proc	uses ebx edi esi hWnd,wMsg,wParam,lParam
+	LOCAL ps:PAINTSTRUCT
+	LOCAL rect:RECT
+	LOCAL hdc:HDC
+	LOCAL hMemDC:HDC
+
 		mov	eax,wMsg
 		.if	eax == WM_CLOSE
 			invoke	EndDialog,hWnd,NULL
@@ -121,7 +126,17 @@ _ProcDlgMain	proc	uses ebx edi esi hWnd,wMsg,wParam,lParam
 			shr ebx, 16
 			invoke	SendMessage,hWnd,WM_SETICON,IDI_ICON,eax
 		.elseif eax == WM_PAINT
-			
+			ret
+			invoke GetClientRect,hWnd,addr rect
+			invoke InvalidateRect, hWnd, NULL, 0
+			invoke BeginPaint,hWnd,addr ps
+			mov hdc,eax
+			invoke CreateCompatibleDC,hdc
+			mov hMemDC,eax
+			invoke SetBkMode, hdc, TRANSPARENT
+			invoke DrawText, hdc, addr szStoryTitle, -1, addr rect, DT_CENTER
+			invoke DeleteDC, hMemDC
+			invoke EndPaint, hWnd, addr ps
 		.elseif	eax == WM_COMMAND
 			mov	eax,wParam
 			.if	ax == IDOK
@@ -542,6 +557,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 		  .endif
 	  .elseif wParam == ID_SOUND
 	      ;sound
+		  invoke DialogBoxParam, hInstance, IDD_DIALOG, hWnd, _ProcDlgMain, MB_OK
 		  mov eax, 1
 		  sub eax, EffectSwitch
 		  mov EffectSwitch, eax	
