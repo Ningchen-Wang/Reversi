@@ -220,10 +220,9 @@ DrawOnePiece PROC USES eax, color:DWORD, x:DWORD, y:DWORD, ps:PAINTSTRUCT, hdc:H
    invoke CreateCompatibleDC,hdc
    mov hMemDC,eax
    
-   ;.if color == 0
-	   invoke SelectObject,hMemDC,hBitmap4
-	   invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
-   ;.endif
+
+   invoke SelectObject,hMemDC,hBitmap4
+   invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
    .if color == 1
 	  invoke SelectObject,hMemDC,hBitmap2
 	  invoke BitBlt,hdc,x,y,rect.right,rect.bottom,hMemDC,0,0,SRCAND
@@ -327,17 +326,17 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
    	  invoke GetClientRect,hWnd,addr rect
       invoke InvalidateRect, hWnd, NULL, 0
-
       invoke BeginPaint,hWnd,addr ps
       mov hdc,eax
       invoke CreateCompatibleDC,hdc
       mov hMemDC,eax
+
+	  ;;;;Draw Background
       invoke SelectObject,hMemDC,hBitmap1
       invoke GetClientRect,hWnd,addr rect
       invoke BitBlt,hdc,0,0,rect.right,rect.bottom,hMemDC,0,0,SRCCOPY
 	  
-
-	  ; Draw Chess
+	  ;;;; Draw Chess
 	  L1:
 	  	.if coordY > 7
 			jmp L2
@@ -380,25 +379,20 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 	  mul bx
 	  invoke BitBlt,hdc,520,150,60,70,hMemDC,ax,0,SRCAND
 	 
-
+	  mov ax, wcountDigit1
+	  mov bx, 60
+	  mul bx
+	  invoke BitBlt,hdc,520,150+100,60,70,hMemDC,ax,100,SRCPAINT
 
 	  mov ax, bcountDigit2
 	  mov bx, 60
 	  mul bx
-	  invoke BitBlt,hdc,520+45,150,60,70,hMemDC,ax,0,SRCCOPY;SRCAND
+	  invoke BitBlt,hdc,520+45,150,60,70,hMemDC,ax,0,SRCAND
 
 	  mov ax, wcountDigit2
 	  mov bx, 60
 	  mul bx
-	  invoke BitBlt,hdc,520+45,250,60,70,hMemDC,ax,100,SRCCOPY;SRCPAINT
-
-	  	  mov ax, wcountDigit1
-	  mov bx, 60
-	  mul bx
-	  invoke BitBlt,hdc,520,250,60,70,hMemDC,ax,100,SRCPAINT
-
-	  ; Bitblt
-
+	  invoke BitBlt,hdc,520+45,150+100,60,70,hMemDC,ax,100,SRCPAINT
 
       invoke DeleteDC,hMemDC
 	  invoke AppendLog, hLog, addr paintLog, paintLogLength
