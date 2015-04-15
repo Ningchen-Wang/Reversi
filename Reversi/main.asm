@@ -652,8 +652,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
       ;invoke SelectObject,hImgDC,hBitmapWhite0
 	  ;invoke BitBlt,hMemDC,460,270,rect.right,rect.bottom,hImgDC,0,0,SRCPAINT
 	  invoke SelectObject,hImgDC,hBitmapBlack1
-	  invoke BitBlt,hMemDC,460 ,160,rect.right,rect.bottom,hImgDC,0,0,SRCAND
-	  invoke SelectObject,hImgDC,hBitmapWhite3
+	  invoke BitBlt,hMemDC,460 ,180,rect.right,rect.bottom,hImgDC,0,0,SRCAND
+	  invoke SelectObject,hImgDC,hBitmapWhite1
 	  invoke BitBlt,hMemDC,460,270,rect.right,rect.bottom,hImgDC,0,0,SRCPAINT
 	  
 	  invoke getScoreDigit
